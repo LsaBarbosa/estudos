@@ -19,6 +19,15 @@
 | **Polimorfismo**   | Services, gateways, providers, strategies, repositories e adapters.         |
 | **Abstração**      | Interfaces, portas da arquitetura hexagonal e contratos entre camadas.      |
 
+
+| Princípio | Onde aparece                                                                 | ONde vc aplica SOLID
+| --------- | ---------------------------------------------------------------------------- |------- |
+| **SRP**   | Controller só HTTP; use case orquestra; repository persiste; gateway integra | Contrller HTTP, repositore para persistencia, serviço |
+| **OCP**   | Novos descontos entram como novas `PoliticaDesconto`                         | numa interface, ao inves de encher o service com novas regras de pagamento, crio um interfacePagamento
+| **LSP**   | Evita herança falsa entre formas de pagamento                                | Ao criar uma entidade e usar o @Embeddable para evitar herança numa relação usuario e endereço e usar composição
+| **ISP**   | Ports pequenos para persistência, pagamento e eventos                        | Em repositories de persistencia evitando interface genérica especificando quais comportamentos quero para o repo em específico
+| **DIP**   | Use case depende de interfaces, não de JPA, Kafka ou Feign                   |
+
 ---
 
 ## Exemplo Mental para Entrevista
