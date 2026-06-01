@@ -1,16 +1,17 @@
 ---
 
+ 
+
 # 1. Pilares da Programação Orientada a Objetos
 
 ## Quadro Geral
 
-| Pilar              | Ideia central                                                  | Como aparece em Java                                   | Benefício principal                                                 | Atenção / Trade-off                                                                                          
-| ------------------ | -------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ 
-| **Encapsulamento** | Protege o estado interno do objeto e impede estados inválidos. | Atributos privados + métodos que controlam alterações. | Mantém consistência, reduz acoplamento e protege regras de negócio. | Apenas usar `private` não garante bom encapsulamento. Getters/setters sem regra podem expor demais o objeto. 
-| **Herança**        | Permite criar uma especialização de uma classe base.           | `class Pix extends Pagamento`.                         | Reutiliza comportamento comum e permite especializações.            | Aumenta acoplamento entre pai e filho. Pode criar hierarquias rígidas.                                       
-| **Polimorfismo**   | Permite tratar objetos diferentes pela mesma abstração.        | Interface `PaymentGateway` com várias implementações.  | Facilita extensão, testes e troca de implementação.                 | Excesso de abstração pode dificultar a navegação no código.                                                  
-| **Abstração**      | Expõe apenas o essencial e esconde detalhes internos.          | Interfaces, classes abstratas e services.              | Reduz dependência de detalhes técnicos.                             | Abstrações mal desenhadas ficam genéricas demais ou artificiais.                                             
-
+| Pilar | Ideia central | Como aparece em Java | Benefício principal | Atenção / Trade-off |
+|---|---|---|---|---|
+| **Encapsulamento** | Protege o estado interno do objeto e evita estados inválidos. | Uso de atributos `private` e métodos que controlam alterações. | Mantém a consistência do objeto, reduz acoplamento e protege regras de negócio. | Apenas usar `private` não garante bom encapsulamento. Getters e setters sem regra podem expor demais o objeto. |
+| **Herança** | Permite criar uma classe especializada a partir de uma classe base. | `class Pix extends Pagamento`. | Reutiliza comportamentos comuns e permite especializações. | Aumenta o acoplamento entre classe pai e classe filha. Pode criar hierarquias rígidas e difíceis de manter. |
+| **Polimorfismo** | Permite tratar objetos diferentes por meio da mesma abstração. | Interface `PaymentGateway` com múltiplas implementações. | Facilita extensão, testes, substituição de comportamento e manutenção. | Excesso de abstração pode dificultar a navegação e a compreensão do código. |
+| **Abstração** | Expõe apenas o essencial e esconde detalhes internos de implementação. | Interfaces, classes abstratas, services e ports. | Reduz dependência de detalhes técnicos e melhora a separação de responsabilidades. | Abstrações mal desenhadas podem ficar genéricas demais, artificiais ou difíceis de evoluir. |
 ---
 
 ## Uso Prático no Dia a Dia
