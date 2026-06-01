@@ -248,15 +248,6 @@ Colisão acontece quando duas chaves diferentes caem no mesmo bucket.
 
 ---
 
-## 7. Entende árvores?
-
-### Problema
-
-Listas não escalam bem para buscas ordenadas.
-
-
----
-
 
 ## 9. Entende filas e pilhas?
 
