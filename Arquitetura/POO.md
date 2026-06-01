@@ -1,7 +1,3 @@
----
-
- 
-
 # 1. Pilares da Programação Orientada a Objetos
 
 ## Quadro Geral
