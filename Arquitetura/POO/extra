@@ -39,3 +39,43 @@ class CheckoutService {
         return meioPagamento.pagar(pedido);
     }
 }
+# Polimorfismo
+- Capacidade de tratar diferentes implementações por meio da mesma astração
+  - Garantindo que  comportamento real seja escolhido em tempo de execução
+List<MeioPagamento> meios = List.of(
+    new PagamentoPix(),
+    new PagamentoCartao()
+);
+
+for (MeioPagamento meio : meios) {
+    meio.pagar(pedido);
+}
+
+# Abstração
+
+interface NotificadorCliente {
+    void notificarPagamentoAprovado(Pedido pedido);
+}
+
+Quem usa essa abstração não sabe se a notificação vai por:
+
+e-mail;
+SMS;
+WhatsApp;
+push notification;
+evento Kafka.
+
+Isso é bom porque o caso de uso depende de uma intenção de negócio, não de uma tecnologia.
+
+Cuidado com nomes como:
+
+UserProvider
+UserProviderImpl
+
+Isso pode ser aceitável, mas muitas vezes indica abstração fraca. Para nível Senior, prefira nomes que expressem negócio ou responsabilidade:
+
+ClienteRepository
+AutenticadorUsuario
+ProvedorUsuarioAutenticado
+GatewayPagamento
+PublicadorEventoPedido
