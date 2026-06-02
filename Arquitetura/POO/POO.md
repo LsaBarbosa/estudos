@@ -4,9 +4,7 @@
 
 | Pilar | Ideia central | Como aparece em Java | Benefício principal | Atenção / Trade-off |minha nota
 |---|---|---|---|---|---|----|
-| **Encapsulamento** | Protege o estado interno do objeto e evita estados inválidos. | Uso de atributos `private` e métodos que controlam alterações. | Mantém a consistência do objeto, reduz acoplamento e protege regras de negócio. | Apenas usar `private` não garante bom encapsulamento. Getters e setters sem regra podem expor demais o objeto. |é proteger o estado interno do objeto e garantir que ele só possa mudar por meio de comportamentos válidos do domínio. | `
-pedido.setStatus(PAGO); // ruim se qualquer classe puder fazer isso
-pedido.confirmarPagamento(pagamento); // melhor, porque valida regra de negócio
+| **Encapsulamento** | Protege o estado interno do objeto e evita estados inválidos. | Uso de atributos `private` e métodos que controlam alterações. | Mantém a consistência do objeto, reduz acoplamento e protege regras de negócio. | Apenas usar `private` não garante bom encapsulamento. Getters e setters sem regra podem expor demais o objeto. |é proteger o estado interno do objeto e garantir que ele só possa mudar por meio de comportamentos válidos do domínio. | `pedido.setStatus(PAGO); // ruim se qualquer classe puder fazer isso pedido.confirmarPagamento(pagamento); // melhor, porque valida regra de negócio
 `
 | **Herança** | Permite criar uma classe especializada a partir de uma classe base. | `class Pix extends Pagamento`. | Reutiliza comportamentos comuns e permite especializações. | Aumenta o acoplamento entre classe pai e classe filha. Pode criar hierarquias rígidas e difíceis de manter. | Herança deve ser usada qauando a relação é um, pois o acoplamento e forte
 | **Polimorfismo** | Permite tratar objetos diferentes por meio da mesma abstração. | Interface `PaymentGateway` com múltiplas implementações. | Facilita extensão, testes, substituição de comportamento e manutenção. | Excesso de abstração pode dificultar a navegação e a compreensão do código. |
