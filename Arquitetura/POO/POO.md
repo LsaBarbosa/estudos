@@ -2,7 +2,7 @@
 
 ## Quadro Geral
 
-| Pilar | Ideia central | Como aparece em Java | Benefício principal | Atenção / Trade-off |minha nota
+| Pilar | Ideia central | Como aparece em Java | Benefício principal | Atenção / Trade-off |minha nota| exemplo
 |---|---|---|---|---|---|----|
 | **Encapsulamento** | Protege o estado interno do objeto e evita estados inválidos. | Uso de atributos `private` e métodos que controlam alterações. | Mantém a consistência do objeto, reduz acoplamento e protege regras de negócio. | Apenas usar `private` não garante bom encapsulamento. Getters e setters sem regra podem expor demais o objeto. |é proteger o estado interno do objeto e garantir que ele só possa mudar por meio de comportamentos válidos do domínio. | `pedido.setStatus(PAGO); ruim se qualquer classe puder fazer isso pedido.confirmarPagamento(pagamento);  melhor, porque valida regra de negócio
 `
