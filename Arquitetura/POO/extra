@@ -1,1 +1,5 @@
+```java
+pedido.setStatus(PAGO); // ruim se qualquer classe puder fazer isso
 
+pedido.confirmarPagamento(pagamento); // melhor, porque valida regra de negócio
+```
