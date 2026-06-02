@@ -1,5 +1,41 @@
-```java
+# Encapsulamento
 pedido.setStatus(PAGO); // ruim se qualquer classe puder fazer isso
 
+  - Aqui tem uma invariante de domínio
+    - Uma regra que sempre precisa ser verdadeira
 pedido.confirmarPagamento(pagamento); // melhor, porque valida regra de negócio
-```
+
+# Herança
+  - Hierarquia profunda dificulta a manutenção
+  - Mudança na supeClass quebra subclasses
+  - Pode violar o princípio de substituição e liskov (ao tentar executar um comportamento que nao compete a classe filha)
+  - testes ficam mais difíceis porque comportamento está espalhado pela hierarquia
+
+# Composição
+  - Usa / tem
+  - interface MeioPagamento {
+    Pagamento pagar(Pedido pedido);
+}
+
+class PagamentoPix implements MeioPagamento {
+    public Pagamento pagar(Pedido pedido) {
+        // lógica de pagamento via Pix
+    }
+}
+
+class PagamentoCartao implements MeioPagamento {
+    public Pagamento pagar(Pedido pedido) {
+        // lógica de pagamento via cartão
+    }
+}
+class CheckoutService {
+    private final MeioPagamento meioPagamento;
+
+    CheckoutService(MeioPagamento meioPagamento) {
+        this.meioPagamento = meioPagamento;
+    }
+
+    public Pagamento finalizar(Pedido pedido) {
+        return meioPagamento.pagar(pedido);
+    }
+}
