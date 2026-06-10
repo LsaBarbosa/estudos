@@ -1,4 +1,3 @@
-Lucas, segue uma versão **mais enxuta**, em **formato de revisão**.
 
 # Manifesto Ágil — Revisão em Tabelas
 
