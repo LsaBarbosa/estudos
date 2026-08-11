@@ -112,7 +112,24 @@ Product product2 = new Product(id, "Notebook");
 System.out.println(product1 == product2);      // false
 System.out.println(product1.equals(product2)); // true
 ```
+```
+customer1.hashCode()
+        ↓
+determina o bucket
+        ↓
+procura objetos naquele bucket
+        ↓
+usa equals() para verificar igualdade
+```
+```
+hashCode()
+    ↓
+onde procurar
 
+equals()
+    ↓
+é realmente o mesmo objeto lógico?
+```
 ---
 
 # Collection
