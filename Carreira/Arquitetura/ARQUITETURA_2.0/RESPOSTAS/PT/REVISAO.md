@@ -1,7 +1,15 @@
+# Equals Hash
+>HashSet utiliza o hashCode para determinar em qual bucket procurar o objeto e depois utiliza equals para verificar se o elemento existente é logicamente igual ao novo elemento.
+>
+>O contrato exige que, se dois objetos forem iguais segundo equals, eles obrigatoriamente tenham o mesmo hashCode. O contrário não é obrigatório, porque diferentes objetos podem ter o mesmo hash, caracterizando uma colisão.
+>
+>Se equals e hashCode forem implementados de forma inconsistente, um HashSet pode aceitar elementos que deveriam ser considerados duplicados ou não conseguir encontrar um objeto que já está na coleção.
+>
+>Também evitaria usar atributos mutáveis no cálculo do hashCode, porque alterar esses atributos depois que o objeto foi inserido no HashSet pode fazer com que ele fique armazenado em um bucket diferente daquele que seria calculado posteriormente.
+>
+>Em entidades JPA existe uma dificuldade adicional quando o ID é gerado pelo banco, porque antes do persist o ID pode ser null e depois passar a ter um valor. Por isso eu teria cuidado ao basear diretamente equals e hashCode nesse ID e, quando possível, utilizaria uma identidade estável que exista durante todo o ciclo de vida do objeto.
 
 # 1. Como funciona uma Virtual Thread?
-
- 
 
 > Uma thread virtual é mais leve e roda sobre a plataform thread.
 >
