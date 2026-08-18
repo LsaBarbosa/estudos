@@ -31,7 +31,7 @@
   - Não utilizaria Eager como solução automática para N mais um.
 
   - Escolheria a estratégia de consulta de acordo com o caso de uso, utilizando Join Fetch, Entity Graph, batch fetching.
- 
+ ---
 # Resiliência
 
   - **Falha ou Lentidão** em chaamdas: defino timeouts explícitos e evito chamadas bloqueadas indefinidamente.
