@@ -45,5 +45,19 @@ pressionando um serviço degradado.
     - Devo tratar duplicidade, idempotência, retry, Dead Letter Queue e eventual consistency.
 #### Observabilidade
 Eu monitoraria latência, taxa de erro, retries, circuit breakers, filas, pools de conexão e recursos da aplicação, utilizando logs estruturados, métricas e distributed tracing.
+--- 
 
+# Microsserviços 
+- Cada serviço é **dono dos próprios dados**, evitando banco compartilhado.
+  - Quando um serviço precisa de informações de outro, uso contratos bem definidos, normalmente APIs ou eventos.
 
+- Na comunicação entre serviços:
+  - **HTTP ou gRPC quando a resposta é necessária imediatamente**
+  - **Comunicação assíncrona com Kafka ou filas**, quando quero desacoplamento temporal, absorção de picos ou processamento eventual.
+
+- Evito cadeias síncronas longas, pois aumentam latência e reduzem a disponibilidade.
+- Para resiliência, aplico mecanismos como **timeout, circuit breaker, bulkhead, rate limiting e retry com critério**.
+
+- `@Transactional` local não resolve o problema distribuído. Nesse cenário, trabalho com **Saga, compensações, Transactional Outbox, idempotência e eventual consistency**.
+
+- Em microsserviços uso **logs estruturados, métricas e distributed tracing**, com `traceId`, para conseguir acompanhar uma requisição atravessando vários serviços.
