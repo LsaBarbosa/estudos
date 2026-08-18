@@ -61,3 +61,4 @@ Eu monitoraria latência, taxa de erro, retries, circuit breakers, filas, pools 
 - `@Transactional` local não resolve o problema distribuído. Nesse cenário, trabalho com **Saga, compensações, Transactional Outbox, idempotência e eventual consistency**.
 
 - Em microsserviços uso **logs estruturados, métricas e distributed tracing**, com `traceId`, para conseguir acompanhar uma requisição atravessando vários serviços.
+--- 
