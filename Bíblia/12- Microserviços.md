@@ -25,29 +25,7 @@ Uma boa boundary tende a produzir serviços **independentemente implantáveis, p
 
 ---
 
-# 2. A pergunta principal: onde termina um serviço?
-
-Esse é provavelmente o ponto mais importante.
-
-Não devemos começar pensando:
-
-```text
-CustomerController
-OrderController
-PaymentController
-```
-
-e concluir:
-
-```text
-3 controllers
-=
-3 microservices
-```
-
-O raciocínio deveria começar pelo negócio.
-
-Pergunte:
+# 2. Como definir o MS
 
 ```text
 Quem é responsável por essa regra?
@@ -79,40 +57,17 @@ talvez elas **não sejam dois serviços**.
 Imagine um domínio de e-commerce:
 
 ```text
-Customer
-Order
-Payment
-Shipping
+Customer | Order  
 ```
 
 Uma decomposição possível:
 
 ```text
-Customer Service
-│
-├── Customer
-├── Address
-└── Customer rules
-
-
-Order Service
-│
-├── Order
-├── OrderItem
-└── Order rules
-
-
-Payment Service
-│
-├── Payment
-├── Refund
-└── Payment rules
-
-
-Shipping Service
-│
-├── Shipment
-└── Shipping rules
+Customer Service      Order Service
+│                       │ 
+├── Customer            ├── Order
+├── Address             ├── OrderItem
+└── Customer rules      ├── Order rules
 ```
 
 O importante é que cada boundary represente uma **capacidade coesa de negócio**.
@@ -121,251 +76,27 @@ O importante é que cada boundary represente uma **capacidade coesa de negócio*
 
 # 4. Bounded Context
 
-DDD ajuda bastante na definição dessas fronteiras.
+- DDD ajuda bastante na definição dessas fronteiras.
 
-Um erro comum é pensar que uma entidade possui exatamente o mesmo significado em todo o sistema.
-
-Por exemplo:
-
-```text
-Customer
-```
-
-Para vendas pode significar:
-
-```text
-id
-name
-creditLimit
-commercialStatus
-```
-
-Para suporte:
-
-```text
-id
-name
-tickets
-serviceLevel
-```
-
-Para logística:
-
-```text
-id
-deliveryAddress
-contact
-```
-
-Não necessariamente existe um único objeto universal:
-
-```java
-Customer
-```
-
-com cinquenta atributos usado por todos.
-
-Cada bounded context pode ter seu próprio modelo. O princípio de soberania de dados em microsserviços está diretamente relacionado a essa ideia: o serviço deve possuir seu modelo, seus dados e seu comportamento. 
+- Cada bounded context pode ter seu próprio modelo. 
+- O princípio de soberania de dados em microsserviços está diretamente relacionado a essa ideia: o serviço deve possuir seu modelo, seus dados e seu comportamento. 
 
 ---
 
 # 5. Data Ownership
 
-Essa pergunta precisa estar automática:
+- Cada MS é responsável por seus dados
+- A comunucação deve ser por APi externa ou eventos (mensageria)
+ 
+> Somente o serviço proprietário deve alterar diretamente seu estado persistente.w
 
-> **Quem é dono desse dado?**
+> A Microsoft recomenda explicitamente que serviços não compartilhem diretamente seus armazenamentos e que cada serviço gerencie seus dados privados. 
 
-Imagine:
-
-```text
-Customer Service
-```
-
-é proprietário de:
-
-```text
-customer.name
-customer.email
-customer.status
-```
-
-Então:
-
-```text
-Order Service
-```
-
-não deveria fazer:
-
-```sql
-UPDATE customer
-SET status = ...
-```
-
-no banco do Customer Service.
-
-Ele deveria pedir ao dono:
-
-```text
-Order Service
-      ↓
-Customer API
-```
-
-ou comunicar-se através de eventos dependendo do caso.
-
-A regra central é:
-
-> **Somente o serviço proprietário deve alterar diretamente seu estado persistente.**
-
-A Microsoft recomenda explicitamente que serviços não compartilhem diretamente seus armazenamentos e que cada serviço gerencie seus dados privados. 
+> A ideia de Database per Service é justamente manter os dados persistentes privados ao serviço. Isso reduz acoplamento e permite que alterações internas do schema não obriguem outros serviços a mudar. 
 
 ---
 
-# 6. Rule Ownership
-
-Não basta saber quem possui o dado.
-
-Também é necessário perguntar:
-
-> **Quem possui a regra?**
-
-Imagine:
-
-```text
-Order Service
-```
-
-quer saber:
-
-> Este pagamento pode ser estornado?
-
-Se essa decisão pertence ao domínio de pagamentos, não deveríamos copiar a regra:
-
-```java
-if (payment.getDays() < 7 && ...)
-```
-
-para dentro de Order.
-
-A responsabilidade deveria permanecer no:
-
-```text
-Payment Service
-```
-
-O problema de duplicar regras entre serviços é que, quando a regra mudar:
-
-```text
-Payment Service
-Order Service
-Customer Service
-```
-
-podem começar a tomar decisões diferentes.
-
----
-
-# 7. Database per Service
-
-Arquitetura desejada:
-
-```text
-Customer Service
-      │
-      ↓
- Customer DB
-
-
-Order Service
-      │
-      ↓
-   Order DB
-
-
-Payment Service
-      │
-      ↓
- Payment DB
-```
-
-A regra é:
-
-```text
-Order Service
-     X
-Customer DB
-```
-
-O Order Service não deve acessar diretamente o banco de Customer.
-
-Ele acessa:
-
-```text
-Customer Service
-```
-
-através de um contrato.
-
-A ideia de Database per Service é justamente manter os dados persistentes privados ao serviço. Isso reduz acoplamento e permite que alterações internas do schema não obriguem outros serviços a mudar. 
-
----
-
-# 8. Um detalhe importante: não precisa ser um servidor físico por serviço
-
-`Database per Service` não significa obrigatoriamente:
-
-```text
-10 serviços
-=
-10 servidores PostgreSQL
-```
-
-A separação pode ser feita através de:
-
-```text
-database por serviço
-```
-
-ou:
-
-```text
-schema privado por serviço
-```
-
-ou, em alguns casos:
-
-```text
-tabelas privadas por serviço
-```
-
-O fundamental é:
-
-> **ownership e acesso exclusivo.**
-
-Por exemplo:
-
-```text
-PostgreSQL Server
-│
-├── customer_schema
-│      ↑
-│ Customer Service
-│
-├── order_schema
-│      ↑
-│ Order Service
-│
-└── payment_schema
-       ↑
-  Payment Service
-```
-
-Cada serviço poderia utilizar credenciais que só permitem acesso ao próprio schema. 
-
----
-
-# 9. Por que Shared Database é perigoso?
+# 6. Por que Shared Database é perigoso?
 
 Arquitetura:
 
@@ -374,196 +105,21 @@ Service A ─┐
 Service B ─┼── Shared Database
 Service C ─┘
 ```
+- parece inicialmente simples é possivel:
+  - JOIN | foreign key | transaction ACID
 
-parece inicialmente simples.
-
-Você consegue:
-
-```text
-JOIN
-foreign key
-transaction ACID
-```
-
-facilmente.
-
-Mas agora:
-
-```text
-Service A
-```
-
-altera uma coluna.
-
-E:
-
-```text
-Service B
-Service C
-```
-
-dependem daquela coluna.
-
-Então uma mudança que deveria ser local exige coordenação entre equipes.
-
-Isso cria:
-
-### Development-time coupling
-
-```text
-schema mudou
-    ↓
-vários serviços precisam mudar
-```
-
-### Runtime coupling
-
-Uma transação de um serviço pode bloquear recursos utilizados por outro.
-
-### Deployment coupling
-
-Alterações precisam ser coordenadas.
-
-Esse acoplamento de desenvolvimento e runtime é justamente uma das principais desvantagens documentadas para shared database. 
-
+- Mas se um serviço altera uma coluna, e outro serviço dependa temos um problema
+  - Mudança que deveria ser local exige coordenação entre equipes.
 ---
 
-# 10. Independência de deploy
-
-Um teste muito útil para saber se você realmente possui microsserviços:
-
-> **Posso fazer deploy do serviço A sem fazer deploy do serviço B?**
-
-Se toda alteração exige:
-
-```text
-deploy A
-+
-deploy B
-+
-deploy C
-```
-
-provavelmente existe forte acoplamento.
-
-O objetivo é:
-
-```text
-Payment Service v15
-      ↓
-deploy
-```
-
-sem obrigatoriamente:
-
-```text
-Order Service
-Customer Service
-Shipping Service
-```
-
-serem atualizados.
-
-Contratos precisam evoluir de maneira compatível para tornar isso possível. Independência de deploy é uma das características usadas para avaliar boas boundaries de microsserviços. 
-
----
-
-# 11. Chatty Services
-
-Suponha:
-
-```text
-Order Service
-      ↓
-Customer Service
-      ↓
-Order Service
-      ↓
-Customer Service
-      ↓
-Payment Service
-      ↓
-Customer Service
-```
-
-para completar uma requisição.
-
-Isso é um sinal de alerta.
-
-Uma chamada HTTP local:
-
-```java
-customer.getCreditLimit();
-```
-
-quando distribuída pode virar:
-
-```text
-network
-timeout
-serialization
-authentication
-retry
-latency
-failure
-```
-
-Se dois serviços precisam se comunicar o tempo inteiro, talvez a boundary esteja errada.
-
-A Microsoft também recomenda observar explicitamente chamadas excessivamente “chatty” ao definir boundaries. 
-
----
-
-# 12. Database per Service cria novos problemas
+# 7 Database per Service cria novos problemas
 
 Separar bancos resolve acoplamento.
 
-Mas cria outras dificuldades.
-
-Antes:
-
-```sql
-SELECT *
-FROM customer c
-JOIN orders o ON ...
-JOIN payment p ON ...
-```
-
-Agora:
-
-```text
-Customer DB
-
-Order DB
-
-Payment DB
-```
-
-Não podemos simplesmente fazer um join entre tudo.
-
-Também não podemos usar uma transação ACID local facilmente para:
-
-```text
-Customer
-+
-Order
-+
-Payment
-```
-
-Por isso aparecem padrões como:
-
-```text
-API Composition
-
-CQRS
-
-Events
-
-Saga
-
-Eventual Consistency
-```
+Mas como trade transação distribuida.
+- Não há mais @Transaction
+- Agora há necessidade de implementar padrões como saga, CQRS
+- Consistencia eventual
 
 Database per Service melhora autonomia, mas transações e consultas que atravessam serviços ficam mais complexas. 
 
