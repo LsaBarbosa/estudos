@@ -105,3 +105,58 @@ Também analisaria o isolation level do banco, duração da transação,
 | REPEATABLE READ  |     Impede |              Impede | depende da implementação/semântica do banco |
 | SERIALIZABLE     |     Impede |              Impede |                                      Impede |
 
+Lucas, aqui está a tabela focada exatamente nos pontos que você pediu:
+
+| Tema | Conceito | Vantagem | Trade-off | Uso real em produção |
+|---|---|---|---|---|
+| **Particionamento** | Divide uma tabela grande em partes menores chamadas **partições**, normalmente por `RANGE`, `HASH` ou `LIST`. Para a aplicação, muitas vezes continua existindo uma única tabela lógica. | Melhora manutenção, pode reduzir o volume de dados lido, facilita arquivamento e remoção de dados antigos. | Aumenta complexidade de modelagem, exige escolher bem a chave de particionamento e pode piorar queries que não usam essa chave. | Tabelas de **logs, pedidos, transações e auditoria** particionadas por mês ou ano usando `created_at`. |
+| **Partition Pruning** | Otimização em que o banco identifica quais partições podem ser ignoradas antes de executar a consulta. | Reduz leitura de dados, I/O e CPU. Pode melhorar bastante queries em tabelas muito grandes. | Só funciona bem quando o predicado da query permite ao banco identificar a partição correta. Queries mal escritas podem impedir o pruning. | `WHERE created_at BETWEEN '2026-09-01' AND '2026-09-30'` em uma tabela particionada por `created_at`, fazendo o PostgreSQL consultar apenas a partição de setembro. |
+| **Sharding** | Divide horizontalmente os dados entre **bancos/nós diferentes**. Cada shard contém apenas uma parte do dataset. | Permite escalar armazenamento e escrita horizontalmente, distribuindo carga entre várias instâncias. | Aumenta muito a complexidade: routing, migrations, JOINs, transações distribuídas, observabilidade, backup, rebalancing e queries globais. | Plataformas com dezenas ou centenas de milhões de clientes distribuindo dados por `customer_id`, `tenant_id` ou `account_id`. |
+| **Hotspot** | Ocorre quando um shard recebe muito mais dados ou requisições que os outros. | Não é uma vantagem em si; é um problema que precisa ser evitado. Detectá-lo ajuda a melhorar distribuição e capacidade. | Pode saturar CPU, storage, conexões ou I/O de um shard enquanto outros permanecem ociosos. | Um sistema shardeado por `empresa_id` onde um único grande cliente gera 70% das requisições e concentra toda a carga em um shard. |
+| **Boa Shard Key** | Chave usada para determinar em qual shard o dado ficará. Deve considerar **cardinalidade, distribuição e padrões de acesso**. | Permite localizar diretamente o shard correto, reduz `scatter-gather` e mantém dados relacionados próximos. | Uma escolha ruim é difícil de corrigir depois. Pode gerar hotspots, consultas cross-shard e rebalancing caro. | Usar `customer_id` quando quase todas as operações são feitas por cliente, permitindo que pedidos, pagamentos e histórico fiquem no mesmo shard. |
+
+## Resumo para memorizar
+
+A relação entre eles é:
+
+```text
+PARTICIONAMENTO
+      |
+      | divide uma tabela
+      v
+Partitions
+      |
+      v
+Partition Pruning
+evita consultar partitions desnecessárias
+```
+
+Enquanto:
+
+```text
+SHARDING
+   |
+   | divide dados entre bancos
+   v
+Shard 1   Shard 2   Shard 3
+              |
+              v
+          Shard Key
+              |
+      precisa distribuir bem
+              |
+              v
+        evitar Hotspot
+```
+
+### O ponto mais importante de cada um
+
+| Tema | Pergunta mental |
+|---|---|
+| Particionamento | **Como dividir uma tabela grande?** |
+| Partition Pruning | **Quais partições posso ignorar nesta query?** |
+| Sharding | **Como distribuir dados entre vários bancos?** |
+| Hotspot | **Algum shard está recebendo carga demais?** |
+| Shard Key | **Qual chave determina onde o dado ficará?** |
+ 
+
