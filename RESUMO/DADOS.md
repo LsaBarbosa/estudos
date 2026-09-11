@@ -36,6 +36,50 @@ isolamento (Atomic UPDATE, Serializable )/ locks (Pessimistc, Optmistic / MVCC
     - Feito com @Lock(LockModeType.PESSIMISTIC_WRITE)
 - **Serializable**
     - O banco garante um resultado equivalente a executar as transações uma depois da outra, mesmo que elas tenham ocorrido concorrentemente.
+
+| Optimistic | Pessimistic |
+|---|---|
+| Detecta conflito | Evita simultaneidade sobre o registro |
+| Normalmente usa `@Version` | Usa lock no banco |
+| Não segura lock durante toda a lógica | Pode manter lock até `COMMIT` |
+| Excelente para baixa contenção | Útil para alta contenção |
+| Conflito gera erro | Concorrente pode esperar |
+| Maior concorrência | Pode reduzir throughput |
+| Pode exigir retry | Pode gerar espera/deadlock |
+
+```text
+                 Concorrência
+                      │
+          ┌───────────┴───────────┐
+          ▼                       ▼
+      READ/WRITE              WRITE/WRITE
+          │                       │
+          ▼                       ▼
+         MVCC                  conflito
+                                  │
+                    ┌─────────────┼─────────────┐
+                    ▼             ▼             ▼
+               operação      optimistic    pessimistic
+                atômica         lock           lock
+                                   │
+                                   ▼
+                               @Version
+```
+Primeiro eu identificaria qual invariável precisa ser protegida e
+qual é o nível de contenção esperado.
+
+Se a alteração puder ser expressa através de um UPDATE condicional
+atômico, eu tenderia a preferi-lo.
+
+Para entidades com baixa disputa, optimistic locking através de
+@Version é uma boa opção.
+
+Quando existe alta contenção e preciso serializar o acesso a um
+recurso específico, avaliaria pessimistic locking.
+
+Também analisaria o isolation level do banco, duração da transação,
+índices, possibilidade de deadlock, política de timeout e retry.
+
 ---
 ## Níveis de Isolamento
  | Nível                | O que é                                                                | Quando usar                                                                       | Trade-off                                                                              | Exemplo comum                                                                        |
