@@ -66,5 +66,50 @@ Circuit Breaker OPEN
 |---|---|---|---|---|
 | **Distributed Tracing** | Rastreamento de uma requisição através de vários serviços usando `traceId` e `spanId`. | Permite descobrir onde ocorreu latência ou falha dentro de um fluxo distribuído. | Tem custo de instrumentação, armazenamento e sampling. | OpenTelemetry rastreia Gateway → Order → Payment → Inventory. |
 | **Logs** | Registro estruturado de eventos internos da aplicação. | Ajuda investigação de falhas, auditoria e diagnóstico. | Alto volume, custo de armazenamento e necessidade de correlação. | Logs JSON enviados para Elasticsearch, Loki, Datadog ou Splunk. |
- 
+
+ # Hexagonal
+| Conceito | O que é | Trade-off | Uso real em produção |
+|---|---|---|---|
+| **Core** | Núcleo da aplicação. Contém principalmente **domínio, regras de negócio e casos de uso**, evitando dependência direta de banco, HTTP, Kafka, Spring Data etc. | Aumenta o isolamento e testabilidade, mas exige disciplina para não deixar detalhes de infraestrutura vazarem para o Core. Em sistemas CRUD simples pode adicionar abstrações desnecessárias. | Em um `payment-service`, contém regras como validar pagamento, aprovar/rejeitar transações e coordenar o caso de uso, sem conhecer PostgreSQL, Kafka ou API antifraude. |
+| **Ports** | Contratos que definem como o Core se comunica com o exterior. Representam **capacidades** oferecidas ou requeridas pela aplicação. Em Java, normalmente são interfaces. | Adicionam abstrações e classes/interfaces extras. Criar uma Port para qualquer operação trivial pode gerar overengineering. | Interfaces como `CreatePaymentUseCase`, `PaymentRepositoryPort`, `FraudCheckPort` e `EventPublisherPort`. |
+| **Input Port / Inbound Port** | Define uma **operação que a aplicação disponibiliza**. Normalmente representa um caso de uso. | Pode parecer redundante quando existe apenas um Controller e uma implementação simples. Torna-se útil quando existem múltiplos mecanismos de entrada ou necessidade de forte desacoplamento. | `CreateOrderUseCase`, que pode ser chamado por REST, Kafka Consumer, GraphQL ou Scheduler sem alterar a regra de negócio. |
+| **Output Port / Outbound Port** | Define uma **capacidade externa necessária ao Core**. O Core define o contrato, mas não conhece a implementação tecnológica. | Pode introduzir abstrações que não trazem benefício quando a infraestrutura dificilmente mudará e não há necessidade de isolamento para testes. | `PaymentRepositoryPort`, `FraudCheckPort`, `NotificationPort`, `EventPublisherPort`. Podem ser implementados por PostgreSQL, REST, Kafka, SNS etc. |
+| **Adapter** | Implementação que conecta uma Port a uma tecnologia ou mecanismo concreto. | Adiciona uma camada de tradução entre Core e infraestrutura. Frequentemente exige DTOs, mappers e conversões adicionais. | Controller REST, Consumer Kafka, Repository JPA, cliente HTTP, produtor Kafka, integração com S3 etc. |
+| **Inbound Adapter** | Adapter que **inicia uma interação com o Core**, chamando uma Input Port. | Pode haver alguma duplicação de tradução/validação quando o mesmo caso de uso possui diversos canais de entrada. | `OrderController`, `KafkaOrderConsumer`, `SqsListener`, `GraphQLResolver`, Scheduler. Todos podem chamar o mesmo `CreateOrderUseCase`. |
+| **Outbound Adapter** | Implementa uma Output Port e conecta o Core a recursos externos. | Requer mapeamento entre modelo de domínio e modelo tecnológico. Pode aumentar a quantidade de classes. | `JpaPaymentRepositoryAdapter`, `KafkaEventPublisherAdapter`, `FraudHttpAdapter`, `S3DocumentAdapter`. |
+| **Direção da dependência** | As dependências de código devem apontar **para o Core**, e não do Core para infraestrutura. O Core conhece abstrações; infraestrutura conhece e implementa essas abstrações. | Exige controle arquitetural. Um simples `@Autowired JpaRepository` dentro do caso de uso pode quebrar a separação. | `CreatePaymentService → PaymentRepositoryPort ← JpaPaymentRepositoryAdapter`. O caso de uso conhece a Port; JPA fica no adapter. |
+
+## Corelações
+| Conceito | Correlação com Arquitetura Hexagonal | Trade-off | Uso real em produção |
+|---|---|---|---|
+| **Dependency Inversion — DIP** | É um dos principais fundamentos da Hexagonal. O Core não depende de implementações de baixo nível; depende de abstrações definidas de acordo com suas necessidades. | Exige criação de interfaces e separação entre abstração e implementação. Aplicado indiscriminadamente pode gerar abstrações sem valor. | `PaymentService` depende de `PaymentRepositoryPort`, e `JpaPaymentRepositoryAdapter` implementa essa Port. O domínio não conhece JPA. |
+| **Dependency Injection — DI** | É o mecanismo utilizado para fornecer ao Core as implementações concretas das Ports. **DI não é DIP**: DI injeta dependências; DIP define a direção arquitetural dessas dependências. | Normalmente requer um container IoC como Spring ou configuração manual de objetos. Uma aplicação excessivamente dependente do container pode dificultar a leitura do fluxo. | O Spring injeta `JpaPaymentRepositoryAdapter` onde existe uma dependência `PaymentRepositoryPort`. |
+| **Spring** | Deve atuar principalmente como **framework de infraestrutura e composição**, não como elemento central do domínio. Spring MVC, Spring Data, Kafka e WebClient normalmente ficam nos adapters. | Isolar completamente Spring aumenta configuração e quantidade de classes. Em projetos pequenos, algum acoplamento pragmático pode ser aceitável. | `@RestController` no inbound adapter, Spring Data no persistence adapter, `KafkaTemplate` no outbound adapter e `@Configuration` realizando o wiring. |
+| **Testes** | Ports tornam o Core facilmente testável, pois dependências externas podem ser substituídas por mocks, stubs ou fakes. | Mocks em excesso podem produzir testes frágeis ou distantes do comportamento real. Nem tudo deve ser mockado. | Um `CreateOrderService` pode ser testado com Mockito sem PostgreSQL, Kafka, HTTP Server ou Spring Context. |
+| **Testcontainers** | Complementa Hexagonal testando os **outbound adapters contra infraestrutura real**, enquanto o Core continua sendo testado isoladamente. | Testes são mais lentos que unitários e necessitam Docker/container runtime. Também exigem gerenciamento do ciclo dos containers. | Testar `JpaPaymentRepositoryAdapter` contra PostgreSQL real, `KafkaEventPublisherAdapter` contra Kafka e adapters Redis contra Redis real. |
+```text
+Arquitetura Hexagonal
+        │
+        ├── Ports & Adapters
+        │
+        ├── Dependency Inversion
+        │        │
+        │        └── Core depende de abstrações
+        │
+        ├── Dependency Injection
+        │        │
+        │        └── conecta implementação à abstração
+        │
+        ├── Spring
+        │        │
+        │        └── composição + adapters
+        │
+        └── Testabilidade
+                 │
+                 ├── Core → Unit Tests
+                 │
+                 └── Adapter → Integration Tests
+                                  │
+                                  └── Testcontainers
+```                                
  
