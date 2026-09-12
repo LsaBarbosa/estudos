@@ -26,3 +26,32 @@
 | **Exactly-once** | Busca produzir efeitos exatamente uma vez dentro de um escopo transacional suportado pelo Kafka. | Mais complexidade e custo; não resolve automaticamente efeitos externos como banco, REST ou e-mail. | Pipelines Kafka → Kafka, Kafka Streams e processamento transacional com offsets + produção de novos registros. |
 | **DLT — Dead Letter Topic** | Topic separado para mensagens que falharam após retries ou são consideradas não processáveis. | Evita travar o fluxo principal, mas exige operação, observabilidade e estratégia de reprocessamento. | Evento com schema inválido ou erro permanente é enviado para `pedido-criado.DLT`. |
  
+ 
+```text
+                         Kafka
+                           |
+          +----------------+----------------+
+          |                |                |
+          v                v                v
+ Event-Driven         Microservices     Spring Kafka
+ Architecture
+          |                |                |
+          v                v                v
+Eventual Consistency   Desacoplamento  @KafkaListener
+          |                |            KafkaTemplate
+          v                v
+        Saga          Resiliência
+          |                |
+          v                v
+     Compensação      Retry / DLT
+                           |
+                           v
+                     Idempotência
+                           |
+                           v
+                      At-least-once
+                           |
+                           v
+                    Transactional
+                       Outbox
+```
