@@ -1,4 +1,4 @@
-Lucas, segue uma tabela enxuta com os **conceitos mais importantes de concorrência em Java**, focando em decisão prática e produção.
+# Concorrência
 
 | Conceito | O que é | Trade-off | Uso real em produção |
 |---|---|---|---|
@@ -44,63 +44,32 @@ Lucas, segue uma tabela enxuta com os **conceitos mais importantes de concorrên
 | **Idempotência** | Executar a mesma operação várias vezes produz o mesmo efeito lógico de uma execução. | Exige chave idempotente e armazenamento/verificação adicional. | Kafka, retries, pagamentos, processamento distribuído. |
 | **Kafka Partitioning** | Eventos com a mesma key podem ser direcionados para a mesma partição, preservando ordem dentro dela. | A ordem é garantida apenas por partição; keys mal distribuídas podem criar hot partitions. | Serializar eventos do mesmo `orderId`, `customerId` ou agregado. |
 
-## Os que você precisa dominar primeiro
-
-Para entrevista Java/Spring, eu reduziria inicialmente para esta sequência:
+## Arquitetura e Concorrência
 
 ```text
-Race Condition
-    ↓
-Atomicidade
-    ↓
-Visibilidade
-    ↓
-Java Memory Model / happens-before
-    ↓
-synchronized
-    ↓
-volatile
-    ↓
-Atomic*
-    ↓
-ReentrantLock
-    ↓
-ExecutorService
-    ↓
-CompletableFuture
-    ↓
-ConcurrentHashMap
-    ↓
-Deadlock
-    ↓
-Virtual Threads
-    ↓
-Concorrência distribuída
-    ↓
-Optimistic / Pessimistic Locking
+Dentro da JVM                        Entre JVMs / Pods
+────────────────────────  |       ────────────────────────
+synchronized                        Banco de dados
+volatile                            Optimistic Locking
+Atomic*                             Pessimistic Locking
+Lock                                Atomic UPDATE
+ConcurrentHashMap                   Kafka partitioning
+                                    Idempotência
+                                    Distributed Lock
+
 ```
-
-A separação mais importante para arquitetura é esta:
-
-```text
-Dentro da JVM
-────────────────────────
-synchronized
-volatile
-Atomic*
-Lock
-ConcurrentHashMap
-
-
-Entre JVMs / Pods
-────────────────────────
-Banco de dados
-Optimistic Locking
-Pessimistic Locking
-Atomic UPDATE
-Kafka partitioning
-Idempotência
-Distributed Lock
-```
-
-Esse último ponto evita um erro comum: tentar resolver um problema **distribuído** usando uma ferramenta de concorrência **local da JVM**.
+ 
+# Stream
+| Conceito | O que é | Vantagem | Trade-off | Aplicação real em produção |
+|---|---|---|---|---|
+| **Classe abstrata** | Classe que não pode ser instanciada diretamente e pode conter **estado, métodos concretos e métodos abstratos**. Serve como base para classes relacionadas. | Permite reutilizar comportamento e estado comum entre subclasses. | Cria **forte acoplamento por herança**. Java permite herdar apenas uma classe. Pode virar uma classe-base gigante se mal utilizada. | Classes que compartilham comportamento real, como `AbstractPayment`, `AbstractNotificationHandler`, `AbstractEntity`. |
+| **Método abstrato** | Método declarado sem implementação, obrigando subclasses concretas a implementá-lo. | Define pontos obrigatórios de especialização. | Aumenta dependência entre classe pai e subclasses. | Uma classe `ReportGenerator` pode definir `generateContent()` e deixar PDF/Excel implementarem o conteúdo específico. |
+| **Template Method** | Classe abstrata define o **algoritmo principal**, enquanto subclasses implementam determinadas etapas. | Evita duplicação e padroniza fluxos. | Pode gerar hierarquias rígidas e dificultar composição. | Processamento de arquivos, importações, pagamentos ou jobs que seguem sempre as mesmas etapas. |
+| **Stream** | API declarativa para processamento de sequências de elementos. Não é uma estrutura de dados; opera sobre fontes como `List`, `Set`, arrays etc. | Código mais declarativo, composição de operações e menor necessidade de loops explícitos. | Uso excessivo pode dificultar debugging e leitura. Streams complexos podem ser menos claros que loops. | Filtrar, transformar, agrupar e agregar coleções retornadas de banco, APIs ou regras de negócio. |
+| **Pipeline de Stream** | Fluxo normalmente formado por `source → operações intermediárias → operação terminal`. | Permite compor processamento de forma legível. | Pipelines muito longos ficam difíceis de entender. | `orders.stream().filter(...).map(...).toList()`. |
+| **Lazy Evaluation** | Operações intermediárias não são executadas imediatamente. O processamento começa quando existe uma operação terminal. | Evita trabalho desnecessário e permite otimizações como short-circuit. | Pode confundir debugging porque uma operação intermediária isolada não executa nada. | Processamentos grandes onde filtros eliminam elementos antes de transformações mais caras. |
+| **Short-circuit** | Algumas operações podem interromper o pipeline antes de consumir todos os elementos. | Melhora desempenho quando a resposta pode ser encontrada cedo. | O ganho depende da ordem dos dados e do pipeline. | `anyMatch`, `findFirst`, `findAny`, `limit`. |
+| **Stream de tipos primitivos** | `IntStream`, `LongStream` e `DoubleStream` evitam boxing/unboxing excessivo. | Melhor performance e operações como `sum()`, `average()`, `max()`. | API diferente de `Stream<T>` em alguns pontos. | Processamento intensivo de valores numéricos. |
+| **Stream é single-use** | Depois que uma operação terminal é executada, aquele Stream não pode ser reutilizado. | Mantém o modelo de pipeline simples. | Tentar reutilizá-lo gera `IllegalStateException`. | Normalmente recriamos o Stream a partir da coleção original quando necessário. |
+| **Streams e efeitos colaterais** | Streams funcionam melhor com operações **stateless** e sem alteração de estado externo. | Facilita paralelização, testes e raciocínio sobre o código. | Exige mudança de mentalidade para quem vem de programação estritamente imperativa. | Preferir `map()` + `toList()` em vez de modificar uma lista externa usando `forEach`. |
+| **`parallelStream()`** | Executa partes do pipeline concorrentemente, normalmente usando o `ForkJoinPool.commonPool()`. | Pode melhorar operações CPU-bound sobre grandes volumes. | Overhead, concorrência, debugging mais difícil, problemas com estado compartilhado e disputa pelo common pool. | Processamento CPU-bound independente e suficientemente grande; **não deve ser usado automaticamente**. |
