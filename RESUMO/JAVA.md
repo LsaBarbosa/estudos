@@ -105,6 +105,15 @@ import()
  ├── process()   ← especializado
  └── save()
 ```
+Diferença
+| Strategy                             | Template Method                                |
+| ------------------------------------ | ---------------------------------------------- |
+| Baseado principalmente em composição | Baseado principalmente em herança              |
+| Troca algoritmo/comportamento        | Especializa etapas de um algoritmo             |
+| Pode variar facilmente em runtime    | Estrutura costuma ser definida pela hierarquia |
+| Cliente escolhe Strategy             | Superclasse controla fluxo                     |
+| Menor acoplamento estrutural         | Maior acoplamento com classe-base              |
+| Excelente para Spring DI             | Útil quando existe workflow realmente estável  |
 
 ---
 
