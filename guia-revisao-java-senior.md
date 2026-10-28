@@ -12,33 +12,240 @@
 
 ---
 
-## 1. Java 17/21 e fundamentos — P0
+## 1. Java 17/21 e fundamentos — P0 (aprofundamento para entrevista)
 
-- **POO:** encapsulamento protege invariantes; abstração expõe contratos; herança modela relação *é um*; polimorfismo permite trocar implementações. Prefira **composição** quando herança cria acoplamento.
-- **`equals()` e `hashCode()`:** objetos iguais devem ter o mesmo hash; fundamentais para `HashMap` e `HashSet`. Cuidado com chaves mutáveis.
-- **Records:** classes concisas para dados, com estado superficialmente imutável; ótimos para DTOs. Não garantem imutabilidade profunda de listas/objetos internos.
-- **Sealed classes:** restringem as subclasses permitidas; úteis para hierarquias de domínio controladas.
-- **Java 17:** `record`, `sealed`, *switch expressions*, *text blocks* e `instanceof` com *pattern matching*.
-- **Java 21:** *virtual threads* (melhor escalabilidade em tarefas bloqueantes de I/O, não aceleração de CPU); *sequenced collections*; *record patterns* e *pattern matching* para `switch`.
-- **Collections:** `List` mantém sequência e aceita duplicatas; `Set` evita duplicatas; `Map` associa chave/valor; `Queue` representa fila; `Deque` atende filas e pilhas.
+**Como responder no nível sênior:** comece pelo conceito em uma frase; mostre um exemplo de código ou de negócio; explique um trade-off; termine com o risco que você observaria em produção. As perguntas abaixo já incluem o essencial de uma boa resposta.
 
-| Estrutura | Característica e custo típico |
+### 1.1 POO — pilares e composição versus herança
+
+**Pergunta: quais são os quatro pilares da orientação a objetos?**
+
+- **Encapsulamento:** protege o estado e obriga alterações a passar por operações que preservam regras. Ex.: `Pedido.confirmar()` valida itens e status; um `setStatus()` público permitiria estados inválidos.
+- **Abstração:** expõe o que um objeto faz sem revelar detalhes. Ex.: `GatewayPagamento.autorizar()` esconde chamadas HTTP e provedores.
+- **Herança:** permite especializar um tipo quando existe uma verdadeira relação **é um** e um contrato substituível. Ex.: diferentes implementações de uma classe base de notificação, se de fato compartilham contrato.
+- **Polimorfismo:** a mesma chamada funciona com implementações diferentes. Ex.: um serviço recebe `GatewayPagamento`, mas executa `PixGateway` ou `CartaoGateway`.
+
+**Pergunta: por que preferir composição à herança?** Composição usa objetos colaboradores (*tem um*), evitando subclasses que dependem de detalhes internos da classe-pai. Escolha herança só quando a substituição fizer sentido e respeitar contratos (Liskov). Uma classe `PedidoService` **tem um** `GatewayPagamento`; ela não **é um** gateway.
+
+```java
+interface GatewayPagamento {
+    void autorizar(Pedido pedido);
+}
+
+class PedidoService {
+    private final GatewayPagamento gateway;
+
+    PedidoService(GatewayPagamento gateway) { this.gateway = gateway; }
+
+    void pagar(Pedido pedido) { gateway.autorizar(pedido); }
+}
+```
+
+**Follow-up provável:** “Isso também é inversão de dependência?” Sim: a regra de negócio depende do **contrato**, não da implementação específica nem do framework.
+
+### 1.2 `equals()` e `hashCode()` — contrato e problemas reais
+
+**Pergunta: por que sobrescrever `hashCode()` quando sobrescrevemos `equals()`?** O contrato exige que **dois objetos iguais retornem o mesmo hash**. `HashMap`/`HashSet` usam o hash para localizar a região de busca e `equals()` para distinguir chaves/elementos equivalentes. Hashes iguais **não** significam que os objetos são iguais; colisões são normais.
+
+**Pergunta: o que acontece se a chave do `HashMap` mudar depois da inserção?** Se um campo usado em `equals()`/`hashCode()` mudar, a busca pode procurar em outra posição e não encontrar a chave, mesmo que ela esteja armazenada. Use chaves imutáveis; cuidado com entidades cujo ID é atribuído só após persistência.
+
+**Pontos que o entrevistador pode explorar:**
+
+- `equals()` deve ser reflexivo, simétrico, transitivo, consistente e retornar `false` para `null`.
+- Mesmo hash é **permitido** para objetos diferentes; hashes diferentes são **proibidos** para objetos iguais.
+- `==` compara identidade de referências; `equals()` compara igualdade lógica **conforme implementado**.
+- `record` fornece `equals()`, `hashCode()` e `toString()` baseados em seus componentes, o que o torna conveniente para objetos de valor simples.
+
+### 1.3 `record`, `sealed` e novidades do Java 17/21
+
+**Pergunta: quando usar `record` em vez de classe tradicional?** Para carregar dados com identidade definida pelo valor, principalmente DTOs e resultados imutáveis. O compilador gera construtor, acessores, `equals()`, `hashCode()` e `toString()`. O `record` é `final` e não pode estender outra classe; pode implementar interfaces.
+
+```java
+record PedidoResponse(Long id, String status, List<String> itens) {
+    PedidoResponse {
+        itens = List.copyOf(itens); // cópia defensiva: lista não modificável
+    }
+}
+```
+
+**Armadilha:** `record` dá imutabilidade **superficial**. Uma lista mutável recebida sem cópia poderia continuar sendo alterada fora do objeto. Evite usar `record` indiscriminadamente em entidades JPA cujo ciclo de vida depende de identidade, proxies e mutabilidade.
+
+**Pergunta: para que serve `sealed`?** Controlar quais tipos podem implementar ou estender uma hierarquia. Isso explicita todas as variantes relevantes e combina bem com `switch` por padrões.
+
+```java
+sealed interface Resultado permits Sucesso, Falha {}
+record Sucesso(String protocolo) implements Resultado {}
+record Falha(String motivo) implements Resultado {}
+
+class ResultadoFormatter {
+    static String mensagem(Resultado resultado) {
+        return switch (resultado) {
+            case Sucesso(var protocolo) -> "OK: " + protocolo;
+            case Falha(var motivo) -> "Erro: " + motivo;
+        };
+    }
+}
+```
+
+**Pergunta: o que é relevante nas versões?**
+
+| No Java 17 (já disponível) | No Java 21 (novidade consolidada) |
 | --- | --- |
-| `ArrayList` | Acesso por índice **O(1)**; inserção no meio **O(n)** |
-| `LinkedList` | Acesso por índice **O(n)**; inserção **O(1)** quando o nó/posição já é conhecido |
-| `HashMap` / `HashSet` | Busca média **O(1)**; sem garantia de ordenação |
-| `TreeMap` / `TreeSet` | Elementos ordenados; busca/inserção **O(log n)** |
-| `ArrayDeque` | Pilha/fila eficiente; prefira a `Stack` na maioria dos usos |
-| Árvore / heap | Árvore organiza busca hierárquica; heap sustenta filas de prioridade |
+| `record`, `sealed`, *switch expressions*, *text blocks*, `instanceof` com padrão | **Virtual threads**; **sequenced collections**; **record patterns**; *pattern matching* em `switch` |
 
-- **Generics:** segurança de tipos em compilação; *type erasure* remove boa parte da informação genérica em runtime. **PECS:** `? extends T` para produzir/ler; `? super T` para consumir/escrever.
-- **Stream API:** operações intermediárias (`filter`, `map`) são *lazy*; terminal (`collect`, `toList`, `reduce`) dispara execução. Evite efeitos colaterais; `parallelStream()` não é ganho automático.
-- **Concorrência:** *race condition* = acesso simultâneo incorreto; *deadlock* = espera circular; `volatile` dá visibilidade, **não** torna `count++` atômico; `synchronized`/`Lock` protegem regiões críticas; `Atomic*` oferece operações atômicas; `ConcurrentHashMap` facilita acesso concorrente.
-- **Execução assíncrona:** `ExecutorService` gerencia tarefas; `CompletableFuture` compõe resultados assíncronos. Virtual threads são úteis para muitas operações bloqueantes; cuide de pools de conexões e limites de serviços externos.
-- **Exceções:** *checked* exigem tratamento/declaração; *unchecked* representam muitas falhas de programação/negócio. Não engula exceções nem exponha stack traces pela API.
-- **Design Patterns:** **Strategy** troca algoritmos; **Factory** encapsula criação; **Adapter** integra contratos; **Decorator** adiciona comportamento; **Observer** desacopla notificações.
+> Atenção à cronologia: nem tudo da coluna “Java 17” estreou no 17; são recursos já disponíveis nessa versão. `record` tornou-se definitivo no 16; `sealed`, no 17. No 21, os recursos listados são finais (não dependem de preview).
 
-**Pergunta-chave:** quando usar `HashMap`, `ConcurrentHashMap`, `synchronized` ou banco de dados para garantir consistência? A resposta depende do escopo (thread, instância ou sistema distribuído).
+**Pergunta: o que são sequenced collections?** Interfaces como `SequencedCollection` expõem operações padronizadas sobre primeiro/último elemento, ordem de encontro e visão reversa (`reversed()`), quando o tipo implementa esse contrato. Não significa que todo `Set` ou `Map` comum passou a ter ordem definida.
+
+### 1.4 Collections, estruturas de dados e complexidade
+
+**Pergunta: quando usar `List`, `Set`, `Map`, `Queue` e `Deque`?**
+
+- **`List`:** sequência acessível por índice; permite duplicatas. Use em itens de um pedido.
+- **`Set`:** conjunto de valores únicos segundo igualdade/comparação; use para permissões ou IDs já vistos.
+- **`Map`:** associa chaves a valores; use para buscar configurações por chave. `Map` não estende `Collection`.
+- **`Queue`:** processamento em fila, geralmente FIFO; **`Deque`** insere/remove nas duas extremidades e serve também como pilha LIFO.
+
+**Pergunta: por que `ArrayList` costuma ser preferível a `LinkedList`?** `ArrayList` armazena referências contiguamente, permite acesso O(1) por índice e costuma ter melhor localidade de memória. `LinkedList` precisa percorrer nós para acessar posição; a inserção pode ser O(1) **depois de localizar o nó**, mas localizar por índice é O(n). Na prática, alocação e overhead de nós também pesam.
+
+| Implementação | Busca/acesso | Inserir/remover | Trade-off principal |
+| --- | --- | --- | --- |
+| `ArrayList` | índice O(1); valor O(n) | fim amortizado O(1); meio O(n) | boa para leitura e iteração |
+| `LinkedList` | índice/valor O(n) | extremidades O(1) | maior custo de memória e percurso |
+| `HashMap` / `HashSet` | média O(1) | média O(1) | sem ordem garantida; colisões possíveis |
+| `LinkedHashMap` | média O(1) | média O(1) | preserva ordem definida (ex.: inserção), com overhead |
+| `TreeMap` / `TreeSet` | O(log n) | O(log n) | mantém ordenação por chave/comparador |
+| `ArrayDeque` | extremidades O(1) amortizado | extremidades O(1) amortizado | ótima fila/pilha, não aceita `null` |
+| `PriorityQueue` (heap) | consultar mínimo O(1) | adicionar/remover mínimo O(log n) | prioridade, não FIFO e não iteração ordenada |
+
+**Pergunta: uma fila e uma pilha resolvem quais problemas?** **BFS** (*busca em largura*) usa fila e é útil para menor caminho em grafo não ponderado; **DFS** (*busca em profundidade*) usa pilha/recursão, útil para percorrer árvores, detectar ciclos e explorar caminhos. **Heap** é uma árvore com propriedade de prioridade; não equivale a árvore binária de busca.
+
+**Pergunta: `HashMap` × `ConcurrentHashMap`?** `HashMap` não é seguro para mutações concorrentes; `ConcurrentHashMap` coordena acesso de múltiplas threads e oferece operações atômicas específicas como `computeIfAbsent`. Mesmo nele, a sequência `if (!containsKey) put(...)` pode ter corrida: prefira operações compostas atômicas. `ConcurrentHashMap` não admite chaves/valores `null`.
+
+### 1.5 Generics e PECS
+
+**Pergunta: por que `List<Integer>` não pode ser atribuída a `List<Number>`?** Generics são **invariantes**: se fosse permitido, alguém poderia adicionar um `Double` à lista de inteiros, quebrando a segurança de tipos.
+
+```java
+static double somar(List<? extends Number> valores) {
+    return valores.stream().mapToDouble(Number::doubleValue).sum();
+}
+
+static void adicionarInteiros(List<? super Integer> destino) {
+    destino.add(10);
+}
+```
+
+**Pergunta: explique PECS.** **Producer Extends, Consumer Super**. Use `? extends T` quando a estrutura **produz** valores que você lê como `T`; use `? super T` quando ela **consome** valores do tipo `T` que você insere. Em `extends`, não se pode adicionar normalmente um `T` arbitrário; em `super`, ler produz apenas `Object` com segurança.
+
+**Pergunta: o que é *type erasure*?** O compilador verifica os tipos genéricos, mas apaga boa parte dessa informação em runtime. Por isso, não é possível usar `new T()` ou `instanceof List<String>` diretamente; também não se pode sobrecarregar métodos que diferem apenas pelo parâmetro genérico apagado.
+
+### 1.6 Stream API — semântica, armadilhas e performance
+
+**Pergunta: diferença entre `map`, `filter`, `flatMap` e `reduce`?**
+
+- `filter`: conserva elementos que satisfazem um predicado.
+- `map`: transforma cada elemento em outro valor.
+- `flatMap`: transforma cada elemento em um fluxo e **achata** os fluxos resultantes; útil para obter todos os itens de vários pedidos.
+- `reduce`: combina elementos em um valor; para coleções mutáveis, `collect` costuma ser a operação apropriada.
+
+```java
+List<String> skus = pedidos.stream()
+    .flatMap(p -> p.itens().stream())
+    .filter(item -> item.ativo())
+    .map(Item::sku)
+    .distinct()
+    .toList();
+```
+
+**Pergunta: o que significa *lazy evaluation*?** Operações intermediárias (`filter`, `map`) montam o pipeline; a execução ocorre com uma operação terminal (`toList`, `collect`, `forEach`, `count`). Um `Stream` é consumível **uma vez**. `toList()` retorna lista não modificável; não assuma isso de qualquer `Collectors.toList()`.
+
+**Pergunta: quando evitar `parallelStream()`?** Em cargas pequenas, I/O bloqueante, código com efeitos colaterais, coletores inadequados ou quando competir pelo *common pool* prejudica outros fluxos. Pode ser útil em tarefas CPU-bound independentes, com dados suficientes e ganho **medido**. Não faça mutação de um `ArrayList` compartilhado dentro de `parallelStream()`.
+
+**Follow-up:** Stream ou `for` tradicional? Use o que comunica melhor a intenção; quando fluxo contém regras complexas, mutação delicada ou otimização comprovada, um loop explícito pode ser mais claro.
+
+### 1.7 Concorrência — visibilidade, atomicidade, locks e deadlock
+
+**Pergunta: qual é a diferença entre `volatile`, `synchronized` e `AtomicInteger`?**
+
+- **`volatile`:** garante visibilidade de leitura/escrita e ordenação relevante pelo modelo de memória. **Não** transforma `contador++` em operação atômica, pois há leitura, cálculo e escrita.
+- **`synchronized`:** estabelece exclusão mútua no mesmo monitor e relações de visibilidade (*happens-before*); protege invariantes envolvendo **várias operações/campos**.
+- **`AtomicInteger`:** disponibiliza operações atômicas (`incrementAndGet`, CAS) para um contador/valor específico, frequentemente sem precisar de um lock explícito.
+- **`ReentrantLock`:** permite `tryLock`, timeout, lock interruptível e maior controle; exige `unlock()` em `finally`.
+
+```java
+AtomicInteger total = new AtomicInteger();
+total.incrementAndGet(); // incremento atômico entre threads da mesma JVM
+```
+
+**Pergunta: o que são race condition e deadlock?** *Race condition* ocorre quando o resultado depende de uma intercalação imprevisível de threads, como duas requisições decrementando saldo sem sincronização. *Deadlock* ocorre quando threads ficam presas esperando recursos umas das outras. Reduza deadlocks com ordem global de aquisição de locks, tempo limitado de espera, regiões críticas curtas e evitando I/O dentro de locks.
+
+**Pergunta sênior: isso protege duas instâncias de um microsserviço?** **Não.** `synchronized`, `AtomicInteger` e `ConcurrentHashMap` atuam dentro de **uma JVM**. Para integridade entre réplicas, use transação e restrições do banco, controle de versão/lock otimista ou coordenação distribuída justificada. Locks distribuídos precisam de tratamento de expiração e falhas; não são substituto automático de transações.
+
+### 1.8 Virtual threads, ExecutorService e CompletableFuture
+
+**Pergunta: por que virtual threads são importantes no Java 21?** São threads leves gerenciadas pelo runtime, permitindo atender muitas tarefas concorrentes que **esperam I/O**, preservando um estilo sequencial de programação. Uma thread virtual bloqueada em I/O suportado pode liberar sua thread de plataforma para executar outra tarefa. **Não acelera processamento CPU-bound**.
+
+```java
+try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+    var cliente = executor.submit(() -> consultarClienteExterno(1L));
+    var estoque = executor.submit(() -> consultarEstoqueExterno(1L));
+    System.out.println(cliente.get() + " / " + estoque.get());
+}
+```
+
+**Pergunta: virtual threads eliminam pool JDBC e limites de concorrência?** **Não.** O banco tem um número limitado de conexões, e APIs externas têm quotas. Não crie um *pool de virtual threads* apenas para economizá-las; limite o acesso a **recursos escassos** por pools, semáforos ou controles de carga. No JDK 21, operações bloqueantes dentro de certas regiões `synchronized` podem causar *pinning*, reduzindo escalabilidade.
+
+**Pergunta: virtual thread × `CompletableFuture`?** Virtual threads permitem concorrência com código bloqueante legível; `CompletableFuture` permite **compor** tarefas assíncronas, transformar resultados e tratar falhas. Não são equivalentes e podem coexistir.
+
+- **`thenApply(fn)`** transforma o valor disponível.
+- **`thenCompose(fn)`** encadeia outra operação que retorna `CompletableFuture`, evitando futuro aninhado.
+- **`thenCombine(...)`** combina duas operações independentes.
+- **`exceptionally(...)` / `handle(...)`** tratam falhas; defina se haverá fallback, propagação ou erro de negócio.
+- **`ExecutorService`:** controla execução e ciclo de vida; não use indiscriminadamente o *common pool* para I/O pesado. Faça shutdown/cancelamento e configure timeouts.
+
+**Follow-up:** “Qual você usaria para chamar três APIs?” Depende de latência, complexidade de composição, bibliotecas, observabilidade, limites do provedor e clareza. Explique também **timeouts, falhas parciais e propagação de contexto** (trace/security).
+
+### 1.9 Exceções — checked, unchecked e desenho da API
+
+**Pergunta: checked vs unchecked?** *Checked exceptions* (`IOException`, por exemplo) exigem captura ou declaração; *unchecked* (`RuntimeException`) não exigem. Checked pode explicitar falha recuperável em contrato; unchecked costuma representar violações de pré-condições ou falhas que a camada atual não consegue resolver. Não é regra absoluta: considere o contrato público e o contexto.
+
+**Pergunta: como tratar exceções num serviço Spring?** Preserve a causa (`new MinhaException("...", causa)`), traduza erros técnicos nas fronteiras adequadas, exponha erro HTTP consistente por `@RestControllerAdvice` e não retorne detalhes internos sensíveis. Faça log com contexto **uma vez em nível apropriado**; evite capturar `Exception` e devolver sucesso artificial.
+
+**Armadilha:** `finally`/`try-with-resources` liberam recursos; `@Transactional` reverte por padrão em `RuntimeException`/`Error`, mas **não automaticamente** em toda checked exception, sem configuração.
+
+### 1.10 Design Patterns — reconhecer o problema antes do nome
+
+| Padrão | Problema que resolve | Exemplo de entrevista |
+| --- | --- | --- |
+| **Strategy** | Variar algoritmo sem vários `if/else` espalhados | cálculo de frete por modalidade |
+| **Factory** | Centralizar decisão/criação de objetos | instanciar adaptador segundo provedor |
+| **Adapter** | Converter interface externa para contrato interno | gateway que traduz API de pagamento |
+| **Decorator** | Acrescentar comportamento sem modificar classe-base | adicionar métricas/retry a um cliente |
+| **Observer** | Notificar assinantes sobre mudança | eventos internos de domínio; atenção à entrega |
+| **Builder** | Montar objeto complexo com opções legíveis | configuração de cliente/objeto de teste |
+| **Singleton** | Uma instância sob determinado escopo | bean singleton no contexto Spring; estado mutável exige cuidado |
+
+**Pergunta: Strategy e Factory se complementam?** Sim. **Strategy** define como variar o comportamento; **Factory** pode selecionar/criar qual implementação usar. Em Spring, injeção de dependência pode reduzir a necessidade de factories manuais.
+
+**Armadilha sênior:** padrão não é objetivo. Evite criar interfaces e camadas para regras sem variação real; explique custo de abstração, teste e manutenção.
+
+### 1.11 Simulado rápido — responda sem consultar
+
+1. Como garantir que um objeto `Pedido` não entre em estado inválido? **Encapsulamento**: operações de domínio e invariantes, evitando setters irrestritos.
+2. Por que `HashSet` pode permitir dois objetos “iguais” na visão do negócio? `equals()`/`hashCode()` incorretos ou sem igualdade de negócio definida.
+3. Como evitar que um `record` exponha uma lista mutável? Fazer **cópia defensiva** ao construir e devolver apenas estrutura não modificável.
+4. Quando você escolheria `TreeMap`? Quando precisa de chaves ordenadas, navegação por intervalo ou consultas predecessor/sucessor; aceita O(log n).
+5. Por que `List<? extends Number>` não permite `add(10)`? O tipo real pode ser `List<Double>`; adicionar `Integer` quebraria a segurança de tipos.
+6. `map` versus `flatMap`? Um transforma valores; o outro transforma em fluxos e os achata.
+7. Por que `volatile int contador` ainda perde incrementos? `++` exige três etapas; **visibilidade não é atomicidade**.
+8. `ConcurrentHashMap` protege seu saldo em três pods? Não: apenas concorrência local à JVM, sem transação distribuída.
+9. Quando virtual threads não dão ganho? Trabalho CPU-bound ou quando o gargalo é banco/serviço externo saturado.
+10. Como usar `CompletableFuture` sem criar `CompletableFuture<CompletableFuture<T>>`? Encadeando com **`thenCompose`**.
+11. Quando `parallelStream()` piora performance? Overhead, tarefas pequenas, disputa pelo pool, bloqueio e efeitos colaterais.
+12. O que você diria ao ser perguntado “qual pattern usaria?” Primeiro identificaria **a variação ou acoplamento concreto**; só depois escolheria o padrão mais simples.
+
+**Treino recomendado:** escolha 4 perguntas por dia e responda em **60–90 segundos**, com exemplo real e trade-off. Se a resposta ficar só na definição, aprofunde antes de avançar para Spring.
 
 ## 2. Spring Boot, Beans e APIs REST — P0
 
