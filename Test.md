@@ -56,12 +56,6 @@
 ### 2.1 O que é JDBC e qual a diferença para JPA?
 **Resposta:** JDBC é a API de baixo nível para conexão, execução de SQL e leitura de resultados. JPA é uma especificação de persistência ORM que abstrai mapeamento e gerenciamento de entidades, geralmente implementada pelo Hibernate. JDBC oferece controle explícito; JPA aumenta produtividade, mas exige atenção ao SQL gerado e ao ciclo de vida das entidades.
 
-### 2.2 Por que utilizar `PreparedStatement`?
-**Resposta:** Permite parametrizar valores, reduzindo risco de SQL injection e separando SQL de dados. Não parametriza nomes de tabelas ou colunas: identificadores dinâmicos precisam de validação por allowlist. Pode favorecer reutilização de planos dependendo do banco e driver.
-
-### 2.3 Como funciona o pool de conexões?
-**Resposta:** Reutiliza conexões físicas para reduzir custo de abertura. Spring Boot frequentemente utiliza HikariCP. O dimensionamento deve considerar latência de consultas, concorrência e limite do banco; aumentar o pool indiscriminadamente pode piorar contenção. Monitoro conexões ativas, pendentes e tempo de aquisição.
-
 ### 2.4 Explique ACID e os níveis de isolamento.
 **Resposta:** Atomicidade, Consistência, Isolamento e Durabilidade são propriedades de transações. Níveis comuns: Read Uncommitted, Read Committed, Repeatable Read e Serializable. As garantias exatas variam conforme o SGBD; por exemplo, MVCC e bloqueios afetam quais anomalias são possíveis.
 
@@ -86,9 +80,6 @@
 
 ### 3.2 Como evitar dados desatualizados no Redis?
 **Resposta:** Defino TTL de acordo com tolerância à defasagem e invalido ou atualizo chaves após alterações. Em fluxos distribuídos, considero eventos de invalidação e a possibilidade de atraso ou falha. Não trato cache como fonte de verdade sem projeto específico para isso.
-
-### 3.3 O que são cache stampede, penetration e avalanche?
-**Resposta:** Stampede ocorre quando muitos clientes recalculam uma chave expirada; penetration é consultar repetidamente chaves inexistentes; avalanche é a expiração simultânea de muitas chaves. Mitigações incluem TTL com jitter, single-flight/locks com cautela, cache negativo, rate limiting e pré-aquecimento seletivo.
 
 ### 3.4 Quando Redis não é uma boa escolha?
 **Resposta:** Quando a informação exige consistência forte imediata, quando a taxa de acerto é baixa, ou quando custo operacional e complexidade superam o benefício. Também avalio política de eviction, memória, persistência e indisponibilidade do cache.
@@ -171,19 +162,6 @@
 
 ---
 
-## 8. Metodologias ágeis
-
-### 8.1 Scrum e Kanban: diferenças?
-**Resposta:** Scrum organiza trabalho em sprints com eventos e responsabilidades definidas; Kanban enfatiza fluxo contínuo, visualização, limites de WIP e métricas de fluxo. A escolha depende de previsibilidade, natureza do trabalho e capacidade de entrega.
-
-### 8.2 O que são Definition of Ready e Definition of Done?
-**Resposta:** Ready é um acordo opcional sobre clareza suficiente para iniciar uma tarefa. Done é um compromisso de qualidade do incremento, incluindo critérios como testes, revisão e integração. Não confundo Done com apenas “código implementado”.
-
-### 8.3 Como lidar com mudança de escopo durante a sprint?
-**Resposta:** Avalio urgência, impacto na meta e capacidade, negocio prioridades com Product Owner e equipe e torno os trade-offs transparentes. Evito aceitar trabalho adicional silenciosamente, comprometendo qualidade e previsibilidade.
-
----
-
 ## 9. Arquitetura orientada a eventos
 
 ### 9.1 Qual a diferença entre evento e comando?
@@ -191,9 +169,6 @@
 
 ### 9.2 Service Bus e Event Hubs resolvem o mesmo problema?
 **Resposta:** Não. Azure Service Bus é mensageria corporativa com filas e tópicos, recursos como dead-letter, sessões e processamento confiável. Azure Event Hubs é plataforma de ingestão e streaming de eventos em grande volume, com partições, retenção e offsets/checkpoints por consumidor. Escolho conforme semântica de trabalho versus fluxo de eventos.
-
-### 9.3 O que significa entrega at-least-once?
-**Resposta:** Uma mensagem pode ser entregue novamente após falhas ou perda de confirmação. O consumidor deve ser idempotente, por exemplo, registrando identificadores processados sob constraint única e realizando a mudança de estado na mesma transação quando possível.
 
 ### 9.4 O que é padrão Outbox?
 **Resposta:** Na mesma transação do banco, salvo a alteração de negócio e um registro outbox. Um publicador assíncrono envia os eventos posteriormente, reduzindo o risco de gravar no banco sem publicar. Ainda é necessário tratar duplicatas, ordenação, retry e monitoramento de backlog.
