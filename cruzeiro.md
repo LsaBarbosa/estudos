@@ -1,805 +1,1832 @@
-## Table of contents
+<a id="sumario-geral"></a>
 
-- [§01 — Java 8 → 21, OOP, collections and runtime](#section-01)
-- [§02 — Spring Boot, HTTP and JPA/Hibernate](#section-02)
-- [§03 — Microservices, legacy modernization, messaging and reliability](#section-03)
-- [§04 — SQL, Oracle and database performance](#section-04)
-- [§05 — Automated testing, code quality and delivery](#section-05)
-- [§06 — Git, containers, AWS and operational troubleshooting](#section-06)
-- [§07 — Design quality, architecture decisions and maintainability](#section-07)
-- [§08 — Role-specific complements (not in the original selection)](#section-08)
-- [§09 — Final review checklist](#section-09)
+## Master Table of Contents
+
+### Stage 1 — Java and the Spring ecosystem
+
+- [01. Java 8 → 21, OOP, Collections and Runtime](#section-01-toc)
+- [02. Spring Boot, HTTP and JPA/Hibernate](#section-02-toc)
+
+### Stage 2 — Architecture, integrations and databases
+
+- [03. Microservices, Legacy Modernization, Messaging and Reliability](#section-03-toc)
+- [04. SQL, Oracle and Database Performance](#section-04-toc)
+
+### Stage 3 — Testing, delivery and software design
+
+- [05. Automated Testing, Code Quality and Delivery](#section-05-toc)
+- [06. Git, Containers, AWS and Operational Troubleshooting](#section-06-toc)
+- [07. Design Quality, Architecture Decisions and Maintainability](#section-07-toc)
+
+### Stage 4 — Vacancy-specific preparation
+
+- [08. Role-Specific Complements](#section-08-toc)
+- [09. Final Concept Checklist](#section-09)
 - [References](#references)
+
+> Each chapter includes a detailed **Topic Contents** list. Under every concept you can return to **↑ Topic Contents** or **↑ Master Contents**.
+
+---
 
 <a id="section-01"></a>
 ## §01 — Java 8 → 21, OOP, collections and runtime [P0]
 
+<a id="section-01-toc"></a>
+
+## Topic Contents
+
+[↑ Master Contents](#sumario-geral)
+
+- [01.01 == vs equals](#topic-01-01)
+- [01.02 equals, hashCode, and toString](#topic-01-02)
+- [01.03 Encapsulation and Invariants](#topic-01-03)
+- [01.04 Composition and Delegation](#topic-01-04)
+- [01.05 Records, Sealed Classes, and Enums](#topic-01-05)
+- [01.06 Immutability and Defensive Copying](#topic-01-06)
+- [01.07 Generics and Type Safety](#topic-01-07)
+- [01.08 Checked and Unchecked Exceptions](#topic-01-08)
+- [01.09 BigDecimal and Monetary Values](#topic-01-09)
+- [01.10 ArrayList and Complexity](#topic-01-10)
+- [01.11 HashMap](#topic-01-11)
+- [01.12 Mutable Keys in HashMap and HashSet](#topic-01-12)
+- [01.13 Stream vs Collection](#topic-01-13)
+- [01.14 map vs flatMap](#topic-01-14)
+- [01.15 Optional](#topic-01-15)
+- [01.16 Parallel Streams](#topic-01-16)
+- [01.17 Heap](#topic-01-17)
+- [01.18 Stack and Local Variables](#topic-01-18)
+- [01.19 Garbage Collector](#topic-01-19)
+- [01.20 Memory Leaks in Java](#topic-01-20)
+- [01.21 G1 vs ZGC](#topic-01-21)
+- [01.22 JFR, JMC, and GC Logs](#topic-01-22)
+- [01.23 Atomicity, Visibility, and Ordering](#topic-01-23)
+- [01.24 Race Condition](#topic-01-24)
+- [01.25 ExecutorService and Thread Pools](#topic-01-25)
+- [01.26 CompletableFuture](#topic-01-26)
+- [01.27 synchronized](#topic-01-27)
+- [01.28 volatile](#topic-01-28)
+- [01.29 Deadlock](#topic-01-29)
+- [01.30 Virtual Threads: Benefits and Limitations](#topic-01-30)
+- [01.31 Virtual Threads and Concurrency Control](#topic-01-31)
+
+---
+
+
 **Focus:** contrast language features with runtime behavior. An experienced engineer explains why a feature helps, and what it does *not* guarantee.
+
+<a id="topic-01-01"></a>
 
 ### 01.01 == vs equals
 
 For primitives, `==` compares values; for references, it compares object identity. `equals` can express logical equality, but the implementation inherited from `Object` also compares identity. The `equals` method does not need to call `hashCode`.
 
+[↑ Topic Contents](#section-01-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-01-02"></a>
+
 ### 01.02 equals, hashCode, and toString
 
 `equals` defines logical equality, `hashCode` must respect that equality for hash-based structures, and `toString` provides useful diagnostic text. With mutable entities, I also avoid changing fields used by `hashCode` while the object is inside a `HashMap` or `HashSet`.
+
+[↑ Topic Contents](#section-01-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-01-03"></a>
 
 ### 01.03 Encapsulation and Invariants
 
 Encapsulation is more than marking fields `private`: it controls how state can change and protects invariants. I prefer exposing business operations rather than generic setters because this reduces invalid states and coupling to internal implementation.
 
+[↑ Topic Contents](#section-01-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-01-04"></a>
+
 ### 01.04 Composition and Delegation
 
 Composition represents a HAS-A relationship and builds behavior through dependencies. I normally prefer composition when reusing behavior or swapping implementations because it reduces the structural coupling introduced by inheritance.
+
+[↑ Topic Contents](#section-01-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-01-05"></a>
 
 ### 01.05 Records, Sealed Classes, and Enums
 
 Records synthesize components, accessors, and methods such as `equals` and `hashCode`, but they are only shallowly immutable. Sealed classes and interfaces restrict permitted subtypes. Enums represent a closed set of constants that may also have state and behavior.
 
+[↑ Topic Contents](#section-01-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-01-06"></a>
+
 ### 01.06 Immutability and Defensive Copying
 
 An immutable object does not change its observable state after construction. I use final fields, validation, and control of mutable references; a list inside a record still needs copying and attention to its elements to prevent external mutation.
+
+[↑ Topic Contents](#section-01-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-01-07"></a>
 
 ### 01.07 Generics and Type Safety
 
 Generics allow code reuse with compiler-checked types, such as `List<Pedido>`. They eliminate unnecessary casts, but `List<Integer>` is not a subtype of `List<Number>`; invariance prevents incompatible insertions.
 
+[↑ Topic Contents](#section-01-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-01-08"></a>
+
 ### 01.08 Checked and Unchecked Exceptions
 
 Checked exceptions must be handled or declared with `throws`. Unchecked exceptions derive from `RuntimeException` and have no such requirement; the choice should reflect the API contract. `Error` generally represents serious problems and should not be caught indiscriminately.
+
+[↑ Topic Contents](#section-01-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-01-09"></a>
 
 ### 01.09 BigDecimal and Monetary Values
 
 `BigDecimal` supports decimal arithmetic with explicit scale and rounding. For money, I avoid constructing it from `double` and specify the rounding policy; `equals` takes scale into account, while `compareTo` compares numeric value.
 
+[↑ Topic Contents](#section-01-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-01-10"></a>
+
 ### 01.10 ArrayList and Complexity
 
 ArrayList is backed by a dynamic array. Index access is O(1), and appending is amortized O(1). Inserting or removing in the middle is O(n) because elements may need to shift.
+
+[↑ Topic Contents](#section-01-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-01-11"></a>
 
 ### 01.11 HashMap
 
 HashMap is a hash-based key-value structure. Under normal conditions, `get` and `put` are O(1) on average. Good `hashCode` implementations and compliance with the `equals` contract are essential for correct behavior and performance.
 
+[↑ Topic Contents](#section-01-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-01-12"></a>
+
 ### 01.12 Mutable Keys in HashMap and HashSet
 
 Changing fields used by `equals` or `hashCode` after insertion can prevent an object from being found in its expected bucket. I prefer stable, immutable keys; equality and hashing must remain consistent while objects are stored.
+
+[↑ Topic Contents](#section-01-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-01-13"></a>
 
 ### 01.13 Stream vs Collection
 
 A Collection stores data; a Stream describes a processing pipeline over a source. Streams are generally consumed only once and do not modify their source by themselves; side effects inside lambdas can compromise results.
 
+[↑ Topic Contents](#section-01-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-01-14"></a>
+
 ### 01.14 map vs flatMap
 
 `map` transforms each element into another value. `flatMap` transforms each element into a stream and flattens the results, such as converting a list of orders into a single stream of their items.
+
+[↑ Topic Contents](#section-01-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-01-15"></a>
 
 ### 01.15 Optional
 
 `Optional` represents possible absence, mainly in return values. I use `map`, `flatMap`, and `orElseThrow` to express control flow; `orElseGet` computes a fallback on demand, whereas an argument passed to `orElse` is evaluated even when a value exists.
 
+[↑ Topic Contents](#section-01-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-01-16"></a>
+
 ### 01.16 Parallel Streams
 
 Parallel streams divide work but add coordination overhead and may contend for a shared pool. I assess data volume, associativity, absence of shared state, and real measurements; parallelizing blocking calls without controls can saturate dependencies.
+
+[↑ Topic Contents](#section-01-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-01-17"></a>
 
 ### 01.17 Heap
 
 The heap is a shared area where objects and arrays reside. It is managed by the garbage collector. If space is insufficient for new allocations and GC cannot reclaim enough memory, `OutOfMemoryError: Java heap space` may occur.
 
+[↑ Topic Contents](#section-01-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-01-18"></a>
+
 ### 01.18 Stack and Local Variables
 
 Each thread has a logical execution stack with method frames, local variables, and operands. Local references can point to heap objects; they are not class metadata stored in Metaspace. Excessive call depth can cause `StackOverflowError`.
+
+[↑ Topic Contents](#section-01-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-01-19"></a>
 
 ### 01.19 Garbage Collector
 
 The garbage collector manages heap memory. It identifies objects no longer reachable from GC Roots and reclaims their memory. Collectors such as G1 and ZGC use different strategies to balance throughput, latency, and resource consumption.
 
+[↑ Topic Contents](#section-01-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-01-20"></a>
+
 ### 01.20 Memory Leaks in Java
 
 A leak can happen when references keep objects alive longer than needed, despite GC. Examples include unbounded caches, forgotten listeners, and improper use of ThreadLocal; I would investigate retention and paths to GC Roots.
+
+[↑ Topic Contents](#section-01-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-01-21"></a>
 
 ### 01.21 G1 vs ZGC
 
 G1 aims to balance throughput and pause-time goals. ZGC prioritizes low latency and performs more work concurrently. Trade-offs should be measured under real workloads, observing CPU, memory, throughput, and latency SLOs.
 
+[↑ Topic Contents](#section-01-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-01-22"></a>
+
 ### 01.22 JFR, JMC, and GC Logs
 
 Java Flight Recorder collects runtime events with diagnostic-appropriate configuration, and Java Mission Control helps analyze them. GC logs show collection frequency, duration, and memory occupancy; I combine this evidence before tuning.
+
+[↑ Topic Contents](#section-01-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-01-23"></a>
 
 ### 01.23 Atomicity, Visibility, and Ordering
 
 Atomicity prevents observing a partially completed operation; visibility ensures updates are observed; ordering constrains how operations may be observed. These are distinct properties: seeing a counter does not make incrementing it atomic.
 
+[↑ Topic Contents](#section-01-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-01-24"></a>
+
 ### 01.24 Race Condition
 
 A race condition occurs when the outcome depends on an incorrect interleaving of tasks, such as two threads reading the same balance and writing conflicting updates. I protect compound operations and their invariants with synchronization or a design that avoids shared state.
+
+[↑ Topic Contents](#section-01-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-01-25"></a>
 
 ### 01.25 ExecutorService and Thread Pools
 
 ExecutorService separates task submission from execution and manages results and shutdown. With platform-thread pools, I size capacity, queues, and rejection policies; unbounded queues can turn overload into steadily increasing memory consumption.
 
+[↑ Topic Contents](#section-01-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-01-26"></a>
+
 ### 01.26 CompletableFuture
 
 CompletableFuture composes asynchronous operations without explicitly blocking at each step. It is useful for combining independent tasks, but overly complex flows can impair readability and observability.
+
+[↑ Topic Contents](#section-01-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-01-27"></a>
 
 ### 01.27 synchronized
 
 `synchronized` provides mutual exclusion and visibility guarantees through a monitor. It is straightforward for protecting critical sections, but high contention on the same monitor may reduce parallelism and throughput.
 
+[↑ Topic Contents](#section-01-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-01-28"></a>
+
 ### 01.28 volatile
 
 `volatile` guarantees visibility and memory ordering for a variable but does not make compound operations atomic. It works well for flags and simple states, but does not replace locks or atomics for read-modify-write operations.
+
+[↑ Topic Contents](#section-01-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-01-29"></a>
 
 ### 01.29 Deadlock
 
 Deadlock occurs when tasks wait cyclically for resources and none can progress. I use consistent acquisition order, small critical sections, and, when appropriate, timed attempts; thread dumps help identify the cycle.
 
+[↑ Topic Contents](#section-01-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-01-30"></a>
+
 ### 01.30 Virtual Threads: Benefits and Limitations
 
 Virtual threads mainly improve scalability for I/O-bound workloads. They do not speed up CPU-bound work or remove external limits. If a database has 30 connections, creating thousands of virtual threads does not increase that limit.
 
+[↑ Topic Contents](#section-01-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-01-31"></a>
+
 ### 01.31 Virtual Threads and Concurrency Control
 
 Virtual threads suit many blocking I/O tasks and are typically created per task rather than pooled for reuse. I limit access to scarce resources with semaphores or dependency connection pools instead of assuming unlimited concurrency.
+
+[↑ Topic Contents](#section-01-toc) · [↑ Master Contents](#sumario-geral)
 
 ---
 
 <a id="section-02"></a>
 ## §02 — Spring Boot, HTTP and JPA/Hibernate [P0]
 
+<a id="section-02-toc"></a>
+
+## Topic Contents
+
+[↑ Master Contents](#sumario-geral)
+
+- [02.01 IoC and Dependency Injection](#topic-02-01)
+- [02.02 Constructor vs Field Injection](#topic-02-02)
+- [02.03 Beans, Containers, and Lifecycle](#topic-02-03)
+- [02.04 Proxies and Self-invocation](#topic-02-04)
+- [02.05 AOP, JDK Proxies, and Class-based Proxies](#topic-02-05)
+- [02.06 @Async and Execution Context](#topic-02-06)
+- [02.07 Starters and Dependency Management](#topic-02-07)
+- [02.08 Auto-configuration and Back-off](#topic-02-08)
+- [02.09 @ConfigurationProperties vs @Value](#topic-02-09)
+- [02.10 Actuator and Endpoint Security](#topic-02-10)
+- [02.11 DispatcherServlet and HttpMessageConverter](#topic-02-11)
+- [02.12 @RestControllerAdvice and Error Handling](#topic-02-12)
+- [02.13 Resources, URIs, and Contracts](#topic-02-13)
+- [02.14 Safe and Idempotent Methods](#topic-02-14)
+- [02.15 HTTP Status Codes](#topic-02-15)
+- [02.16 Idempotency Keys in APIs](#topic-02-16)
+- [02.17 Spring Data vs JPA vs Hibernate](#topic-02-17)
+- [02.18 Persistence Context and Dirty Checking](#topic-02-18)
+- [02.19 Entity States](#topic-02-19)
+- [02.20 persist, merge, and save](#topic-02-20)
+- [02.21 Flush vs Commit](#topic-02-21)
+- [02.22 @Transactional and Transaction Boundaries](#topic-02-22)
+- [02.23 REQUIRED, REQUIRES_NEW, and NESTED](#topic-02-23)
+- [02.24 Rollback: RuntimeException, Error, and Checked Exceptions](#topic-02-24)
+- [02.25 Self-invocation and @Transactional](#topic-02-25)
+- [02.26 readOnly and Asynchronous Transactions](#topic-02-26)
+- [02.27 N+1 and Fetching Strategies](#topic-02-27)
+- [02.28 LAZY, EAGER, and LazyInitializationException](#topic-02-28)
+- [02.29 Optimistic vs Pessimistic Locking](#topic-02-29)
+- [02.30 Projections, Specifications, and Auditing](#topic-02-30)
+- [02.31 Authentication vs Authorization](#topic-02-31)
+- [02.32 SecurityFilterChain](#topic-02-32)
+- [02.33 JWT: Validation and Limitations](#topic-02-33)
+- [02.34 CSRF vs CORS](#topic-02-34)
+
+---
+
+
 **Focus:** be ready to walk through an HTTP request, Spring proxy interception, the persistence context and the SQL produced by Hibernate.
+
+<a id="topic-02-01"></a>
 
 ### 02.01 IoC and Dependency Injection
 
 IoC transfers control over object creation and management to the container. Dependency Injection is how the container supplies those dependencies. I prefer constructor injection because it makes the contract explicit and simplifies testing.
 
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-02"></a>
+
 ### 02.02 Constructor vs Field Injection
 
 Constructor injection makes mandatory dependencies explicit and supports final fields and straightforward tests. Field injection hides part of the contract and relies on infrastructure to populate fields; I use setters when a dependency is genuinely optional and the design calls for it.
+
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-03"></a>
 
 ### 02.03 Beans, Containers, and Lifecycle
 
 A bean is an object managed by the Spring container. Its lifecycle may include instantiation, dependency injection, post-processing, initialization, and destruction. Singleton scope applies per bean definition and container; it does not guarantee thread safety or justify storing request state in services.
 
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-04"></a>
+
 ### 02.04 Proxies and Self-invocation
 
 Spring uses proxies for features such as transactions, caching, and security. The proxy intercepts bean calls and adds behavior. A classic pitfall is self-invocation because internal calls may not pass through the proxy.
+
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-05"></a>
 
 ### 02.05 AOP, JDK Proxies, and Class-based Proxies
 
 AOP separates cross-cutting concerns such as transactions and metrics. In Spring's usual model, interface-based or subclass-based proxies intercept calls; final methods and classes may limit subclass proxies, and internal calls do not go through another proxy.
 
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-06"></a>
+
 ### 02.06 @Async and Execution Context
 
 `@Async` delegates execution to an executor when calls pass through the configured mechanism. The caller's transaction and ThreadLocals are not automatically propagated to the other thread; I configure error handling, capacity, and context explicitly.
+
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-07"></a>
 
 ### 02.07 Starters and Dependency Management
 
 Starters group dependencies for capabilities such as web or persistence; Boot's version management maintains a compatible set. A starter does not implement the feature by itself, and overriding versions requires compatibility checks.
 
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-08"></a>
+
 ### 02.08 Auto-configuration and Back-off
 
 Auto-configuration is conditional. Boot examines the classpath, properties, and existing beans and registers defaults when appropriate. When I supply custom configuration, many auto-configurations back off.
+
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-09"></a>
 
 ### 02.09 @ConfigurationProperties vs @Value
 
 For external configuration, I prefer `@ConfigurationProperties` for groups of properties. It improves typing, validation, and maintainability compared with scattering `@Value` annotations.
 
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-10"></a>
+
 ### 02.10 Actuator and Endpoint Security
 
 Actuator provides operational endpoints and metrics integration. In production, I expose only what is necessary, secure sensitive endpoints, and use health/readiness/liveness checks and metrics for observability.
+
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-11"></a>
 
 ### 02.11 DispatcherServlet and HttpMessageConverter
 
 DispatcherServlet receives the request, uses HandlerMapping to find a controller, and HandlerAdapter to invoke it. HttpMessageConverters transform HTTP request and response bodies into and from Java objects.
 
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-12"></a>
+
 ### 02.12 @RestControllerAdvice and Error Handling
 
 I centralize HTTP exception handling with `@RestControllerAdvice`, translating application exceptions into consistent responses without exposing internal details.
+
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-13"></a>
 
 ### 02.13 Resources, URIs, and Contracts
 
 I model resources with stable identifiers and clear input, output, and error contracts. I avoid directly exposing persistence entities because that couples the API to the database schema and may reveal unintended data.
 
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-14"></a>
+
 ### 02.14 Safe and Idempotent Methods
 
 Safe methods such as `GET` do not request business-state changes. `PUT` and `DELETE` are idempotent by semantics, although responses may vary; `POST` and `PATCH` can implement idempotency mechanisms, but the methods do not guarantee idempotency.
+
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-15"></a>
 
 ### 02.15 HTTP Status Codes
 
 `200` indicates success, `201` creation, and `204` success without a body; `400` invalid input, `401` missing valid authentication, `403` forbidden access, and `404` resource not found. `409` denotes conflict, `429` too many requests, and `5xx` server errors.
 
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-16"></a>
+
 ### 02.16 Idempotency Keys in APIs
 
 An idempotency key identifies retries of the same operation. I record the key, result, and associated request atomically, defining expiration and concurrent-call handling; reuse of a key with different content should be detected.
+
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-17"></a>
 
 ### 02.17 Spring Data vs JPA vs Hibernate
 
 JPA defines the ORM contract, Hibernate implements that contract, and Spring Data JPA adds repositories and Spring integration.
 
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-18"></a>
+
 ### 02.18 Persistence Context and Dirty Checking
 
 The persistence context manages entities. When an entity is managed, the provider can detect changes through dirty checking and synchronize them during flush or commit.
+
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-19"></a>
 
 ### 02.19 Entity States
 
 An entity can be transient, managed, detached, or removed. Dirty checking tracks managed entities; changing a detached entity does not guarantee an automatic update. Understanding state avoids treating `save` or `merge` as a universal fix.
 
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-20"></a>
+
 ### 02.20 persist, merge, and save
 
 `persist` makes a new entity managed; `merge` copies state into a managed instance and returns that instance. In Spring Data JPA, `save` chooses an operation based on whether the entity is new; the object passed to `merge` does not automatically become managed.
+
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-21"></a>
 
 ### 02.21 Flush vs Commit
 
 Flush synchronizes persistence-context changes with the database and may execute SQL before commit. Commit completes the transaction; a successful flush does not mean data is committed or that a later rollback is impossible.
 
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-22"></a>
+
 ### 02.22 @Transactional and Transaction Boundaries
 
 `@Transactional` defines transactional boundaries and usually works through proxies. I also consider propagation, isolation, and rollback. I avoid unnecessary `REQUIRES_NEW` because it creates an independent transaction and may increase connection pool usage.
+
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-23"></a>
 
 ### 02.23 REQUIRED, REQUIRES_NEW, and NESTED
 
 REQUIRED joins an existing transaction or creates one; REQUIRES_NEW creates a separate physical transaction. NESTED may use savepoints within the same transaction where supported. Support depends on the transaction manager and database; independence also increases connection demand.
 
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-24"></a>
+
 ### 02.24 Rollback: RuntimeException, Error, and Checked Exceptions
 
 By default, Spring rolls back on `RuntimeException` and `Error`, but not checked exceptions. I can configure `rollbackFor` or other rules; catching and ignoring a failure may prevent the interceptor from recognizing that rollback is required. [Reference](https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/rolling-back.html)
+
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-25"></a>
 
 ### 02.25 Self-invocation and @Transactional
 
 In the default proxy-based mode, an internal call through `this` does not pass through the transactional interceptor. Annotating the called method therefore does not automatically create the expected transaction; I reorganize collaboration among beans or use explicit transaction control where appropriate. [Reference](https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/annotations.html)
 
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-26"></a>
+
 ### 02.26 readOnly and Asynchronous Transactions
 
 `readOnly=true` is an optimization hint, not a universal prohibition on writes. In thread-bound transactions, creating an asynchronous task does not transfer the caller's transaction; I define the transactional boundary in the flow actually doing the work.
+
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-27"></a>
 
 ### 02.27 N+1 and Fetching Strategies
 
 N+1 occurs when a main query triggers many additional queries for relationships. I detect it using logs/APM and address it with fetch joins, EntityGraphs, projections, or dedicated queries as appropriate.
 
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-28"></a>
+
 ### 02.28 LAZY, EAGER, and LazyInitializationException
 
 LAZY defers loading where supported; EAGER requires data to be made available but does not guarantee a single query. Accessing an uninitialized association outside the context can fail; I select fetching based on the use case instead of making everything EAGER.
+
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-29"></a>
 
 ### 02.29 Optimistic vs Pessimistic Locking
 
 Optimistic locking detects conflicts through versions and works well when conflicts are rare. Pessimistic locking locks data in the database and may be needed when conflict costs are high, but it increases contention.
 
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-30"></a>
+
 ### 02.30 Projections, Specifications, and Auditing
 
 Projections reduce the data loaded, Specifications help with dynamic filters, and auditing automates creation and modification metadata.
+
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-31"></a>
 
 ### 02.31 Authentication vs Authorization
 
 Authentication verifies identity. Authorization decides whether that identity may access a resource or perform an operation.
 
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-32"></a>
+
 ### 02.32 SecurityFilterChain
 
 Spring Security is filter-based on the Servlet stack. `SecurityFilterChain` specifies the mechanisms and rules applied before a request reaches Spring MVC.
+
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-33"></a>
 
 ### 02.33 JWT: Validation and Limitations
 
 Decoding a JWT does not prove its authenticity. I verify the signature, allowed algorithm, issuer, audience, and expiration; a signed JWT is not necessarily encrypted, and revocation needs more than signature verification.
 
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-02-34"></a>
+
 ### 02.34 CSRF vs CORS
 
 CSRF protection addresses forged requests when credentials are sent automatically by the browser. CORS is a browser policy governing cross-origin access and does not replace authentication or authorization.
+
+[↑ Topic Contents](#section-02-toc) · [↑ Master Contents](#sumario-geral)
 
 ---
 
 <a id="section-03"></a>
 ## §03 — Microservices, legacy modernization, messaging and reliability [P0]
 
+<a id="section-03-toc"></a>
+
+## Topic Contents
+
+[↑ Master Contents](#sumario-geral)
+
+- [03.01 Architectural Trade-offs](#topic-03-01)
+- [03.02 DDD and Architecture](#topic-03-02)
+- [03.03 Bounded Context](#topic-03-03)
+- [03.04 Hexagonal Architecture](#topic-03-04)
+- [03.05 Monolith vs Microservices](#topic-03-05)
+- [03.06 When to Extract a Microservice](#topic-03-06)
+- [03.07 Synchronous vs Asynchronous Communication](#topic-03-07)
+- [03.08 Event vs Command](#topic-03-08)
+- [03.09 Strong vs Eventual Consistency](#topic-03-09)
+- [03.10 Saga](#topic-03-10)
+- [03.11 Outbox Pattern](#topic-03-11)
+- [03.12 Idempotency](#topic-03-12)
+- [03.13 Backward Compatibility](#topic-03-13)
+- [03.14 Strangler Fig Pattern](#topic-03-14)
+- [03.15 Anti-Corruption Layer](#topic-03-15)
+- [03.16 Service Boundaries](#topic-03-16)
+- [03.17 Database per Service](#topic-03-17)
+- [03.18 Inbox and Idempotent Consumers](#topic-03-18)
+- [03.19 Timeout](#topic-03-19)
+- [03.20 Unknown Outcome After Timeout](#topic-03-20)
+- [03.21 Retry](#topic-03-21)
+- [03.22 Circuit Breaker](#topic-03-22)
+- [03.23 Bulkhead](#topic-03-23)
+- [03.24 Cascading Failure](#topic-03-24)
+- [03.25 Distributed Tracing](#topic-03-25)
+- [03.26 P95 and P99](#topic-03-26)
+- [03.27 SLO and Error Budget](#topic-03-27)
+- [03.28 Independent Deployment](#topic-03-28)
+- [03.29 Topic](#topic-03-29)
+- [03.30 Partition](#topic-03-30)
+- [03.31 Consumer Group](#topic-03-31)
+- [03.32 Ordering](#topic-03-32)
+- [03.33 At-least-once](#topic-03-33)
+- [03.34 Exactly-once](#topic-03-34)
+- [03.35 Offset Commit](#topic-03-35)
+- [03.36 Consumer Lag](#topic-03-36)
+- [03.37 DLQ](#topic-03-37)
+- [03.38 Schema Evolution](#topic-03-38)
+- [03.39 Kafka vs RabbitMQ](#topic-03-39)
+- [03.40 Kafka and Outbox](#topic-03-40)
+
+---
+
+
 **Focus:** describe service boundaries, failure modes, event delivery semantics and how to avoid losing or duplicating business actions.
+
+<a id="topic-03-01"></a>
 
 ### 03.01 Architectural Trade-offs
 
 Every architectural decision trades one quality for another. Stronger consistency may reduce availability; more abstraction may reduce coupling but add complexity; more services improve autonomy but increase operational burden. In interviews, I make the prioritized requirement and accepted cost explicit.
 
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-02"></a>
+
 ### 03.02 DDD and Architecture
 
 Domain-Driven Design helps when business complexity is significant. I emphasize ubiquitous language, bounded contexts, entities, value objects, aggregates, and domain services. DDD does not require microservices: it also works in modular monoliths and is more about organizing the domain than choosing infrastructure.
+
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-03"></a>
 
 ### 03.03 Bounded Context
 
 In DDD, a bounded context is a boundary within which a domain model has consistent meaning. In microservice architecture, it helps identify more natural service boundaries. The same term can have different models across contexts. I avoid sharing one domain model across services because that increases coupling.
 
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-04"></a>
+
 ### 03.04 Hexagonal Architecture
 
 Hexagonal Architecture centers the system on the domain and uses ports and adapters to isolate infrastructure. Ports define incoming and outgoing contracts; adapters connect HTTP, databases, messaging, or external APIs. The main advantages are decoupling and testability. More classes and abstractions are the cost, so I use it where infrastructure independence brings value.
+
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-05"></a>
 
 ### 03.05 Monolith vs Microservices
 
 I do not treat microservices as the mandatory next step for monoliths. A monolith reduces operational complexity and supports local consistency. Microservices provide autonomy, scaling, and isolation but introduce network failures and distributed consistency. The choice depends on organizational scale, independent domains, deployment frequency, availability requirements, and team operational maturity.
 
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-06"></a>
+
 ### 03.06 When to Extract a Microservice
 
 I consider extraction when a clear domain boundary meets a concrete need, such as independent scaling, different release cadence, failure isolation, distinct security requirements, or ownership by another team. I do not extract solely because a class grew large. I first seek a stable boundary and measure the operational cost.
+
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-07"></a>
 
 ### 03.07 Synchronous vs Asynchronous Communication
 
 Synchronous communication is simpler when the caller needs an immediate response, but creates temporal coupling and propagates latency and failures. Asynchronous communication reduces that coupling and absorbs spikes but requires eventual consistency, idempotency, and observability. I decide based on response needs and expected failure behavior.
 
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-08"></a>
+
 ### 03.08 Event vs Command
 
 A command expresses an intention: `CriarPedido`. An event expresses an accomplished fact: `PedidoCriado`. A command normally has an intended recipient and may fail; an event may have zero or many consumers. Mixing these concepts often produces confusing messaging contracts.
+
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-09"></a>
 
 ### 03.09 Strong vs Eventual Consistency
 
 Strong consistency needs a defined guarantee, such as linearizability: a read that starts after a completed write observes that write or a later one. Eventual consistency allows temporary divergence while promising convergence when no new updates occur. These concepts are not synonyms for database transaction isolation levels.
 
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-10"></a>
+
 ### 03.10 Saga
 
 A Saga coordinates a distributed business transaction across local transactions, using compensating actions when steps fail. It can use choreography through events or orchestration through an explicit coordinator. It does not provide a global ACID rollback; it provides business consistency across services.
+
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-11"></a>
 
 ### 03.11 Outbox Pattern
 
 The Outbox Pattern addresses updating a database and publishing an event without relying on a distributed transaction. The application stores the business change and an outbox record in one local transaction. A separate process later publishes the event. Trade-offs include asynchronous publication, deduplication, and outbox cleanup.
 
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-12"></a>
+
 ### 03.12 Idempotency
 
 An idempotent operation can be retried without unintended additional effects. This matters in distributed systems because retries and redelivery occur. I use idempotency keys, unique constraints, processed-message records, or naturally idempotent business logic depending on the case.
+
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-13"></a>
 
 ### 03.13 Backward Compatibility
 
 Backward compatibility means older consumers keep working after the producer evolves. For APIs and events, I prefer adding optional fields, avoiding abrupt removal or renaming, and coordinating changes in stages. This reduces synchronized deployments.
 
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-14"></a>
+
 ### 03.14 Strangler Fig Pattern
 
 Strangler Fig gradually replaces a legacy system by routing features to new components while the legacy system continues running. Incremental migration reduces big-bang risk. The challenge is preserving integration and consistency during coexistence.
+
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-15"></a>
 
 ### 03.15 Anti-Corruption Layer
 
 An Anti-Corruption Layer protects a domain from legacy or external models. Instead of spreading external types and rules throughout the application, I translate contracts into the internal model at a dedicated boundary. This reduces coupling and eases future replacement.
 
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-16"></a>
+
 ### 03.16 Service Boundaries
 
 I define boundaries based on business capabilities and data ownership, not tables or technical layers. A well-defined service encapsulates its own model, rules, and persistence, reducing excessive cross-service calls.
+
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-17"></a>
 
 ### 03.17 Database per Service
 
 Each microservice should ideally own its data. Directly sharing a schema introduces strong coupling and allows one service to depend on another's internal structure. Integration should happen through APIs or events.
 
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-18"></a>
+
 ### 03.18 Inbox and Idempotent Consumers
 
 I store the received event ID and business change in the same local transaction, enforcing uniqueness to prevent duplicate processing. I acknowledge consumption only after commit; external effects need their own approach, such as another outbox or idempotency key.
+
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-19"></a>
 
 ### 03.19 Timeout
 
 A timeout limits how long a service waits for a dependency. Without one, threads, connections, and other resources may remain blocked indefinitely. It must respect the request's overall time budget and be consistent with retries.
 
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-20"></a>
+
 ### 03.20 Unknown Outcome After Timeout
 
 A timeout means the response missed its deadline, not that the server stopped executing the operation. For effects such as charging a payment, I check the state or retry using the same idempotency key before starting a new operation.
+
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-21"></a>
 
 ### 03.21 Retry
 
 Retries are appropriate for transient failures when operations support re-execution. I limit attempts, use backoff and jitter, and check idempotency. Poorly configured retries can amplify outages.
 
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-22"></a>
+
 ### 03.22 Circuit Breaker
 
 A circuit breaker temporarily stops calls to a dependency with a high failure rate, preventing wasted resources and cascading failures. It typically transitions through closed, open, and half-open states.
+
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-23"></a>
 
 ### 03.23 Bulkhead
 
 Bulkheads isolate resources so one failing dependency cannot consume all application capacity. They can use separate pools, semaphores, or concurrency limits.
 
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-24"></a>
+
 ### 03.24 Cascading Failure
 
 Cascading failure occurs when degradation in one service consumes dependent services' resources and spreads the problem. Timeouts, circuit breakers, bulkheads, rate limits, and graceful degradation can limit the impact.
+
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-25"></a>
 
 ### 03.25 Distributed Tracing
 
 Distributed tracing shows a request's path across multiple services and the time spent in each step. It is especially useful for identifying dependencies that increase latency or cause failures.
 
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-26"></a>
+
 ### 03.26 P95 and P99
 
 P95 and P99 are thresholds at or below which approximately 95% and 99% of observed latencies fall. I track them per operation and dependency alongside volume and errors; averaging percentiles or summing P99s does not produce end-to-end P99.
+
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-27"></a>
 
 ### 03.27 SLO and Error Budget
 
 An SLO sets a reliability or latency target. An error budget represents how much error or downtime remains acceptable under that target. I use it to balance release velocity against reliability investment.
 
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-28"></a>
+
 ### 03.28 Independent Deployment
 
 Independent deployment is a key microservices goal, but is real only when contracts, databases, configuration, and dependencies are also decoupled. If every deployment requires coordination, the architecture remains strongly coupled.
+
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-29"></a>
 
 ### 03.29 Topic
 
 A topic is a logical category of events. It is divided into partitions, and each record belongs to one partition. Partition count influences parallelism, throughput, and ordering.
 
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-30"></a>
+
 ### 03.30 Partition
 
 A partition is an ordered, append-only log within a topic. Ordering is guaranteed within a partition, not globally across all topic partitions.
+
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-31"></a>
 
 ### 03.31 Consumer Group
 
 A consumer group allows parallel consumption of a topic. Within a group, each partition is assigned to at most one active consumer at a time. Different groups consume the same event stream independently.
 
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-32"></a>
+
 ### 03.32 Ordering
 
 Kafka guarantees ordering only within a partition. To preserve order per customer or order, I use a stable key so related events land in the same partition. This reduces parallelism for that key but preserves sequence.
+
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-33"></a>
 
 ### 03.33 At-least-once
 
 At-least-once prioritizes preventing loss but permits duplicates. The offset is commonly committed after processing. If an application processes a message and crashes before committing, delivery may repeat. Hence idempotency matters.
 
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-34"></a>
+
 ### 03.34 Exactly-once
 
 Exactly-once in Kafka depends on scope. Kafka offers idempotent producers and transactions for Kafka-to-Kafka workflows. That does not automatically guarantee end-to-end exactly-once when external effects such as databases or HTTP calls are involved.
+
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-35"></a>
 
 ### 03.35 Offset Commit
 
 A committed offset specifies where a group resumes; it normally stores the next offset to consume. Committing before completion can lose work; committing afterward can cause redelivery. With parallel execution, I do not advance past earlier incomplete records.
 
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-36"></a>
+
 ### 03.36 Consumer Lag
 
 Consumer lag describes the distance between a reference log position and the consumer position, depending on the metric. Committed-offset lag may include processed but uncommitted work; I compare trends, event age, throughput, and errors when interpreting delays.
+
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-37"></a>
 
 ### 03.37 DLQ
 
 A dead-letter queue stores messages that cannot be processed after retry policy exhaustion. It prevents indefinite blocking but requires inspection, fixes, and reprocessing processes. A DLQ should not become a permanent dumping ground for ignored failures.
 
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-38"></a>
+
 ### 03.38 Schema Evolution
 
 Events are contracts. To evolve schemas, I favor backward-compatible changes such as adding optional fields. Formats such as Avro, Protobuf, and JSON Schema can be paired with registries to govern compatibility.
+
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-39"></a>
 
 ### 03.39 Kafka vs RabbitMQ
 
 Kafka is centered on distributed logs, retention, high event throughput, and natural replay. RabbitMQ is traditionally queue- and message-routing-oriented. The decision follows workload: event streaming and history favor Kafka, while work queues and complex routing may favor RabbitMQ.
 
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-03-40"></a>
+
 ### 03.40 Kafka and Outbox
 
 Outbox is a common strategy for publishing Kafka events consistently with a database transaction. The application writes business data and the outbox record together, then a publisher sends the event to Kafka.
+
+[↑ Topic Contents](#section-03-toc) · [↑ Master Contents](#sumario-geral)
 
 ---
 
 <a id="section-04"></a>
 ## §04 — SQL, Oracle and database performance [P0]
 
+<a id="section-04-toc"></a>
+
+## Topic Contents
+
+[↑ Master Contents](#sumario-geral)
+
+- [04.01 Primary Key, Unique, and Foreign Key](#topic-04-01)
+- [04.02 Normalization vs Denormalization](#topic-04-02)
+- [04.03 INNER JOIN, LEFT JOIN, RIGHT JOIN, and FULL JOIN](#topic-04-03)
+- [04.04 CTE vs Subquery](#topic-04-04)
+- [04.05 Window Functions](#topic-04-05)
+- [04.06 EXISTS vs IN vs JOIN](#topic-04-06)
+- [04.07 Indexes](#topic-04-07)
+- [04.08 Composite Indexes and Column Order](#topic-04-08)
+- [04.09 Selectivity and Cardinality](#topic-04-09)
+- [04.10 Sargability](#topic-04-10)
+- [04.11 Execution Plan](#topic-04-11)
+- [04.12 Optimizing Queries in Production](#topic-04-12)
+- [04.13 N+1 Queries](#topic-04-13)
+- [04.14 ACID](#topic-04-14)
+- [04.15 Isolation Levels](#topic-04-15)
+- [04.16 Lost Update and Write Skew](#topic-04-16)
+- [04.17 MVCC](#topic-04-17)
+- [04.18 PostgreSQL vs Oracle: Isolation](#topic-04-18)
+- [04.19 Optimistic vs Pessimistic Concurrency](#topic-04-19)
+- [04.20 Database Deadlocks](#topic-04-20)
+- [04.21 Connection Pools and Saturation](#topic-04-21)
+
+---
+
+
 **Focus:** diagnose a slow Oracle query using evidence, not guesses. Separate JPA configuration problems from database execution problems.
+
+<a id="topic-04-01"></a>
 
 ### 04.01 Primary Key, Unique, and Foreign Key
 
 A primary key uniquely identifies each row and does not allow `NULL`. A `UNIQUE` constraint also enforces uniqueness, but its `NULL` semantics may vary by database. A foreign key enforces referential integrity between tables. I use database constraints because consistency must not rely solely on the application.
 
+[↑ Topic Contents](#section-04-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-04-02"></a>
+
 ### 04.02 Normalization vs Denormalization
 
 Normalization reduces redundancy and update anomalies, usually separating entities and relationships into coherent tables. Denormalization duplicates or precomputes data to reduce joins or speed up reads. I start with a normalized design and denormalize only when a proven performance requirement exists, accepting the additional consistency cost.
+
+[↑ Topic Contents](#section-04-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-04-03"></a>
 
 ### 04.03 INNER JOIN, LEFT JOIN, RIGHT JOIN, and FULL JOIN
 
 `INNER JOIN` returns only rows that match on both sides. `LEFT JOIN` preserves all rows from the left table and returns `NULL` for missing matches on the right. `RIGHT JOIN` does the reverse, while `FULL JOIN` preserves unmatched rows from either side. I choose joins based on relationship semantics, not assumed performance.
 
+[↑ Topic Contents](#section-04-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-04-04"></a>
+
 ### 04.04 CTE vs Subquery
 
 CTEs improve readability and help structure complex queries, including recursion where recursive CTEs are supported. Subqueries may suffice for small cases. I do not assume a CTE is automatically faster or slower: optimizers may treat them differently, so I validate performance through the execution plan.
+
+[↑ Topic Contents](#section-04-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-04-05"></a>
 
 ### 04.05 Window Functions
 
 Window functions calculate values over related rows without collapsing the result as `GROUP BY` does. Examples include `ROW_NUMBER`, `RANK`, `LAG`, `LEAD`, and aggregates using `OVER`. They are useful for rankings, comparisons with prior rows, and running totals without multiple subqueries.
 
+[↑ Topic Contents](#section-04-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-04-06"></a>
+
 ### 04.06 EXISTS vs IN vs JOIN
 
 `EXISTS`, `IN`, and `JOIN` express different needs, although modern optimizers may generate equivalent plans in some cases. I use `EXISTS` to test existence, `JOIN` to combine data, and `IN` where membership semantics are clear. For performance, I compare plans rather than follow a universal rule.
+
+[↑ Topic Contents](#section-04-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-04-07"></a>
 
 ### 04.07 Indexes
 
 An index is an auxiliary structure that reduces data lookup cost, often avoiding a full table scan. Its trade-off is disk space and additional `INSERT`, `UPDATE`, and `DELETE` work to maintain the index. More indexes are not automatically better.
 
+[↑ Topic Contents](#section-04-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-04-08"></a>
+
 ### 04.08 Composite Indexes and Column Order
 
 Column order matters in a composite index. I choose it based on actual filter, join, and ordering patterns. In B-tree indexes, queries tend to make better use of leading prefixes; an index on `(cliente_id, status, data)` is not equivalent to `(status, cliente_id, data)`.
+
+[↑ Topic Contents](#section-04-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-04-09"></a>
 
 ### 04.09 Selectivity and Cardinality
 
 Cardinality describes the number of distinct values in a column, while selectivity describes how much a predicate reduces the row set. Indexes tend to help when the query eliminates a significant fraction of rows. For low-cardinality columns, the optimizer may prefer a scan depending on distribution and volume.
 
+[↑ Topic Contents](#section-04-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-04-10"></a>
+
 ### 04.10 Sargability
 
 A sargable condition lets the database use an index efficiently to locate a data range. Applying a function directly to an indexed column, for example, can prevent or reduce index usage. I aim to keep indexed columns searchable in predicates and confirm results in the execution plan.
+
+[↑ Topic Contents](#section-04-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-04-11"></a>
 
 ### 04.11 Execution Plan
 
 The execution plan shows how the optimizer intends to execute a query: scans, seeks, joins, sorts, row estimates, and relative costs. For a slow query, I compare estimates against actual row counts and check unexpected scans, expensive joins, sorts, missing indexes, and statistics. The goal is finding the cause, not merely forcing an index.
 
+[↑ Topic Contents](#section-04-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-04-12"></a>
+
 ### 04.12 Optimizing Queries in Production
 
 I begin with evidence: latency, frequency, returned data volume, and execution plans. I then inspect filters, joins, indexes, cardinality, statistics, rows read versus returned, and unnecessary O(n) work. Only then do I consider rewriting queries, changing indexes, pagination, or remodeling access.
+
+[↑ Topic Contents](#section-04-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-04-13"></a>
 
 ### 04.13 N+1 Queries
 
 N+1 occurs when an initial query loads a collection of records and additional queries run for each item. This increases round trips and latency. I detect it through logs or APM and address it using joins, batching, or specialized queries and loading strategies as appropriate.
 
+[↑ Topic Contents](#section-04-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-04-14"></a>
+
 ### 04.14 ACID
 
 ACID stands for Atomicity, Consistency, Isolation, and Durability. Atomicity ensures the entire transaction applies or rolls back; consistency preserves rules and constraints; isolation controls interference among concurrent transactions; durability ensures a confirmed commit survives failures according to the database guarantees.
+
+[↑ Topic Contents](#section-04-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-04-15"></a>
 
 ### 04.15 Isolation Levels
 
 The classic levels are `READ UNCOMMITTED`, `READ COMMITTED`, `REPEATABLE READ`, and `SERIALIZABLE`. Higher isolation reduces the possibility of dirty reads, non-repeatable reads, and phantom reads, potentially at greater concurrency cost. Exact behavior depends on the database and its locking or MVCC implementation.
 
+[↑ Topic Contents](#section-04-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-04-16"></a>
+
 ### 04.16 Lost Update and Write Skew
 
 A lost update happens when one write improperly overwrites another. Write skew can occur when transactions update different rows after reading a shared condition, violating a joint rule; versioning one row does not solve every cross-row invariant.
+
+[↑ Topic Contents](#section-04-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-04-17"></a>
 
 ### 04.17 MVCC
 
 MVCC, or Multi-Version Concurrency Control, retains row versions so reads and writes can proceed with less blocking at certain isolation levels. It improves concurrency but does not eliminate conflicts, locks, or the need to understand database-specific isolation.
 
+[↑ Topic Contents](#section-04-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-04-18"></a>
+
 ### 04.18 PostgreSQL vs Oracle: Isolation
 
 Both commonly default to READ COMMITTED, but their guarantees are not interchangeable. PostgreSQL treats READ UNCOMMITTED as READ COMMITTED and supports REPEATABLE READ; Oracle does not offer exactly the same set of levels. I check snapshots, conflicts, and retry requirements in each database's documentation. [PostgreSQL](https://www.postgresql.org/docs/current/transaction-iso.html) · [Oracle](https://docs.oracle.com/en/database/oracle/oracle-database/26/cncpt/data-concurrency-and-consistency.html)
+
+[↑ Topic Contents](#section-04-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-04-19"></a>
 
 ### 04.19 Optimistic vs Pessimistic Concurrency
 
 Optimistic concurrency assumes conflicts are rare and detects concurrent changes, for example with a version column. Pessimistic concurrency locks resources before modifying them. I favor optimistic control when conflicts are rare and pessimistic control when conflict cost is high and expected contention justifies locking.
 
+[↑ Topic Contents](#section-04-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-04-20"></a>
+
 ### 04.20 Database Deadlocks
 
 Deadlocks occur when transactions form a circular wait for locks. Databases generally detect the cycle and abort one transaction. To reduce them, I keep transactions short, acquire resources consistently, use appropriate indexes to avoid locking unnecessary rows, and prepare to retry a victim transaction when appropriate.
 
+[↑ Topic Contents](#section-04-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-04-21"></a>
+
 ### 04.21 Connection Pools and Saturation
 
 Connection pools reuse connections and limit concurrent database operations. I monitor waits for connections, long transactions, and database capacity; increasing pool size may simply shift the overload to the server.
+
+[↑ Topic Contents](#section-04-toc) · [↑ Master Contents](#sumario-geral)
 
 ---
 
 <a id="section-05"></a>
 ## §05 — Automated testing, code quality and delivery [P0]
 
+<a id="section-05-toc"></a>
+
+## Topic Contents
+
+[↑ Master Contents](#sumario-geral)
+
+- [05.01 Unit Tests](#topic-05-01)
+- [05.02 JUnit and Assertions](#topic-05-02)
+- [05.03 Mock, Stub, Fake, and Spy](#topic-05-03)
+- [05.04 Mockito](#topic-05-04)
+- [05.05 Parameterized Tests and Edge Cases](#topic-05-05)
+- [05.06 Integration Tests](#topic-05-06)
+- [05.07 Testcontainers](#topic-05-07)
+- [05.08 @SpringBootTest](#topic-05-08)
+- [05.09 @WebMvcTest and MockMvc](#topic-05-09)
+- [05.10 @DataJpaTest](#topic-05-10)
+- [05.11 Contract Tests](#topic-05-11)
+- [05.12 Test Pyramid](#topic-05-12)
+- [05.13 Coverage and Mutation Testing](#topic-05-13)
+- [05.14 Load and Performance Testing](#topic-05-14)
+- [05.15 Pull Requests and Code Review](#topic-05-15)
+- [05.16 Quality Gate](#topic-05-16)
+- [05.17 CI/CD Pipeline](#topic-05-17)
+- [05.18 Database Migrations](#topic-05-18)
+- [05.19 Zero-Downtime Database Migration](#topic-05-19)
+- [05.20 Expand and Contract](#topic-05-20)
+- [05.21 Rolling vs Blue-Green vs Canary](#topic-05-21)
+
+---
+
+
 **Focus:** the vacancy values **behavioral confidence**, not coverage percentages alone. Explain what each kind of test is designed to catch.
+
+<a id="topic-05-01"></a>
 
 ### 05.01 Unit Tests
 
 Validate a unit of behavior quickly with controlled dependencies. For pure business rules, I instantiate objects directly; starting all of Spring to test a simple function adds cost without improving the evidence.
 
+[↑ Topic Contents](#section-05-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-05-02"></a>
+
 ### 05.02 JUnit and Assertions
 
 JUnit organizes test execution, lifecycle, and parameters. Assertions should verify observable outcomes and relevant cases rather than mirror implementation or merely confirm that no exception was thrown.
+
+[↑ Topic Contents](#section-05-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-05-03"></a>
 
 ### 05.03 Mock, Stub, Fake, and Spy
 
 A stub provides controlled responses; a mock verifies interactions; a fake supplies a simplified working implementation; a spy observes or partially overrides a real object. I choose based on what the test must demonstrate and avoid simulating every internal detail.
 
+[↑ Topic Contents](#section-05-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-05-04"></a>
+
 ### 05.04 Mockito
 
 Mockito creates test doubles and configures dependency responses. I verify interactions when an external call is the important effect; excessive `verify` usage can couple tests to internal structure and make refactoring fragile.
+
+[↑ Topic Contents](#section-05-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-05-05"></a>
 
 ### 05.05 Parameterized Tests and Edge Cases
 
 Parameterized tests exercise the same rule with different inputs. I cover boundaries, absence, duplicates, and invalid data where the contract requires them rather than testing only the happy path.
 
+[↑ Topic Contents](#section-05-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-05-06"></a>
+
 ### 05.06 Integration Tests
 
 Verify interactions between real components, such as application code and a database. They matter for transactions, mappings, SQL, and serialization, which may pass with mocks and fail in real environments.
+
+[↑ Topic Contents](#section-05-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-05-07"></a>
 
 ### 05.07 Testcontainers
 
 Testcontainers runs real dependencies in containers during tests. It makes databases and brokers more like production; I choose suitable versions, isolate test data, and account for startup time and container-runtime availability.
 
+[↑ Topic Contents](#section-05-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-05-08"></a>
+
 ### 05.08 @SpringBootTest
 
 Loads the application context to test interactions among Spring components. It suits flows that need that context, but its cost calls for selective use; the configured web environment determines how HTTP is exercised.
+
+[↑ Topic Contents](#section-05-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-05-09"></a>
 
 ### 05.09 @WebMvcTest and MockMvc
 
 `@WebMvcTest` loads a slice focused on MVC. MockMvc tests Spring HTTP processing without starting a real network server; I validate routes, serialization, errors, and applicable security while controlling controller dependencies.
 
+[↑ Topic Contents](#section-05-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-05-10"></a>
+
 ### 05.10 @DataJpaTest
 
 Loads a JPA persistence slice to test entities, repositories, and queries. An in-memory database may hide differences in dialects, locks, and constraints; for those cases, I use the same database type as production.
+
+[↑ Topic Contents](#section-05-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-05-11"></a>
 
 ### 05.11 Contract Tests
 
 Verify expectations between consumers and providers, such as fields, statuses, and schemas. They help detect incompatibilities without starting the entire system but do not guarantee availability or a complete journey's behavior.
 
+[↑ Topic Contents](#section-05-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-05-12"></a>
+
 ### 05.12 Test Pyramid
 
 Distributes verification across many fast tests and fewer broad, expensive tests. Proportions depend on system risks; the goal is reliable feedback at sustainable cost, not a fixed percentage.
+
+[↑ Topic Contents](#section-05-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-05-13"></a>
 
 ### 05.13 Coverage and Mutation Testing
 
 Coverage shows which code ran but does not guarantee meaningful assertions. Mutation testing makes small code changes to check whether tests detect them; it improves suite evaluation at the cost of longer execution.
 
+[↑ Topic Contents](#section-05-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-05-14"></a>
+
 ### 05.14 Load and Performance Testing
 
 Load tests measure behavior under defined volume; stress tests seek limits; soak tests assess extended operation. I evaluate tail latency, errors, throughput, and saturation using representative data, without confusing user counts with requests per second.
+
+[↑ Topic Contents](#section-05-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-05-15"></a>
 
 ### 05.15 Pull Requests and Code Review
 
 Pull requests are technical and collaboration gates. I combine human review with automated validation rather than rely on review alone. Branch protection should prevent merges when builds, tests, or required checks fail.
 
+[↑ Topic Contents](#section-05-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-05-16"></a>
+
 ### 05.16 Quality Gate
 
 A quality gate defines minimum promotion conditions such as passing tests, acceptable static analysis, and absence of critical vulnerabilities. Gates should prevent real problems instead of accumulating arbitrary metrics.
+
+[↑ Topic Contents](#section-05-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-05-17"></a>
 
 ### 05.17 CI/CD Pipeline
 
 A typical Java pipeline includes checkout, build, unit tests, static analysis, integration tests, packaging, artifact or image publication, deployment, and post-deployment validation. I separate stages to fail early and save time and resources.
 
+[↑ Topic Contents](#section-05-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-05-18"></a>
+
 ### 05.18 Database Migrations
 
 Database migration should be part of delivery using tools such as Flyway or Liquibase. I version scripts, execute them in a controlled way, and avoid destructive changes incompatible with still-running versions.
+
+[↑ Topic Contents](#section-05-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-05-19"></a>
 
 ### 05.19 Zero-Downtime Database Migration
 
 For zero downtime, I make backward-compatible changes in stages. First I add new columns or structures without removing old ones, then update the application to use the new format, migrate data, and remove legacy structures only after no version depends on them.
 
+[↑ Topic Contents](#section-05-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-05-20"></a>
+
 ### 05.20 Expand and Contract
 
 Expand and Contract is a two-phase schema-evolution strategy. Expand adds compatible structures; Contract removes old structures only after all consumers have migrated. This is essential for rolling deployments.
 
+[↑ Topic Contents](#section-05-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-05-21"></a>
+
 ### 05.21 Rolling vs Blue-Green vs Canary
 
 Rolling is simple and economical but mixes versions. Blue-Green enables quick rollback at the cost of duplicate capacity. Canary reduces risk through progressive exposure but demands mature automation and metrics. I choose based on criticality, cost, and operational capability.
+
+[↑ Topic Contents](#section-05-toc) · [↑ Master Contents](#sumario-geral)
 
 ---
 
 <a id="section-06"></a>
 ## §06 — Git, containers, AWS and operational troubleshooting [P1]
 
+<a id="section-06-toc"></a>
+
+## Topic Contents
+
+[↑ Master Contents](#sumario-geral)
+
+- [06.01 Git Strategy](#topic-06-01)
+- [06.02 Trunk-Based Development](#topic-06-02)
+- [06.03 Dockerfile, Layers, and Build Context](#topic-06-03)
+- [06.04 Multi-stage Builds and Java Runtime](#topic-06-04)
+- [06.05 Deployment and ReplicaSet](#topic-06-05)
+- [06.06 Service, DNS, and Inbound Traffic](#topic-06-06)
+- [06.07 Requests, Limits, and OOMKilled](#topic-06-07)
+- [06.08 Startup, Readiness, and Liveness Probes](#topic-06-08)
+- [06.09 Graceful Shutdown](#topic-06-09)
+- [06.10 Pod Diagnostics](#topic-06-10)
+- [06.11 Shared Responsibility Model](#topic-06-11)
+- [06.12 IAM](#topic-06-12)
+- [06.13 IAM User vs Role](#topic-06-13)
+- [06.14 VPC](#topic-06-14)
+- [06.15 RDS](#topic-06-15)
+- [06.16 SQS](#topic-06-16)
+- [06.17 CloudWatch](#topic-06-17)
+- [06.18 Secrets Manager vs Parameter Store](#topic-06-18)
+- [06.19 ECS vs EKS](#topic-06-19)
+- [06.20 Jenkins](#topic-06-20)
+- [06.21 GitLab CI](#topic-06-21)
+- [06.22 Post-deployment Observability](#topic-06-22)
+
+---
+
+
 **Focus:** understand operational mechanics even if you did not own infrastructure. Git conflict handling is a firm requirement, not a bonus.
+
+<a id="topic-06-01"></a>
 
 ### 06.01 Git Strategy
 
 A Git strategy should reduce long-lived branches and late integration. Trunk-based development favors short branches and frequent integration. Git Flow can suit some contexts but adds branches and coordination. I select based on release frequency and team maturity.
 
+[↑ Topic Contents](#section-06-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-06-02"></a>
+
 ### 06.02 Trunk-Based Development
 
 Trunk-based development encourages small, short-lived branches that merge quickly into the trunk. It reduces divergence, conflicts, and time to integration. Feature flags help when functionality is not ready to be exposed.
+
+[↑ Topic Contents](#section-06-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-06-03"></a>
 
 ### 06.03 Dockerfile, Layers, and Build Context
 
 A Dockerfile describes image construction. Step order affects cache reuse; I keep build contexts small and never copy secrets into image layers because deleting them later may leave them in image history.
 
+[↑ Topic Contents](#section-06-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-06-04"></a>
+
 ### 06.04 Multi-stage Builds and Java Runtime
 
 I separate compilation from execution so the final image contains only what is needed. I use a runtime compatible with the JAR and run as a nonprivileged user where possible to reduce image size and process permissions.
+
+[↑ Topic Contents](#section-06-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-06-05"></a>
 
 ### 06.05 Deployment and ReplicaSet
 
 A Deployment declares versions and desired replica counts and manages rollouts through ReplicaSets. Multiple replicas do not guarantee high availability if they share a failure point or are distributed poorly.
 
+[↑ Topic Contents](#section-06-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-06-06"></a>
+
 ### 06.06 Service, DNS, and Inbound Traffic
 
 A Service supplies a stable destination for selected Pods and can be discovered through DNS. External access depends on appropriate resources and controllers, such as LoadBalancer, Ingress, or Gateway API.
+
+[↑ Topic Contents](#section-06-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-06-07"></a>
 
 ### 06.07 Requests, Limits, and OOMKilled
 
 Requests inform scheduling; limits constrain resource use. CPU may be throttled, while exceeding memory can terminate the container; an OS-level `OOMKilled` is not the same as a JVM-thrown `OutOfMemoryError`.
 
+[↑ Topic Contents](#section-06-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-06-08"></a>
+
 ### 06.08 Startup, Readiness, and Liveness Probes
 
 A startup probe allows initialization before other checks apply. Readiness determines whether a Pod receives traffic; liveness may restart a container. Temporary dependency unavailability should not, by default, trigger mass restarts through liveness probes. [Reference](https://kubernetes.io/docs/concepts/workloads/pods/probes/)
+
+[↑ Topic Contents](#section-06-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-06-09"></a>
 
 ### 06.09 Graceful Shutdown
 
 During shutdown, an application should stop accepting new work, safely complete or interrupt active tasks, and release resources. I align Kubernetes termination deadlines with HTTP, consumers, and running tasks to reduce loss during rollouts.
 
+[↑ Topic Contents](#section-06-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-06-10"></a>
+
 ### 06.10 Pod Diagnostics
 
 I start with events, status, and termination reason, then investigate logs, probes, resources, and connectivity. `CrashLoopBackOff` indicates repeated restarts, not a root cause; the cause may be application code, configuration, permissions, or dependencies.
+
+[↑ Topic Contents](#section-06-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-06-11"></a>
 
 ### 06.11 Shared Responsibility Model
 
 Under the shared responsibility model, AWS secures the cloud, including data centers, hardware, and physical infrastructure; customers secure what they run in the cloud, including IAM, network settings, data, service-dependent patches, and application controls.
 
+[↑ Topic Contents](#section-06-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-06-12"></a>
+
 ### 06.12 IAM
 
 IAM controls authentication and authorization within AWS. I work with users, roles, and policies under least privilege: granting only necessary permissions for the smallest practical duration and scope.
+
+[↑ Topic Contents](#section-06-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-06-13"></a>
 
 ### 06.13 IAM User vs Role
 
 An IAM User is a persistent identity. An IAM Role is an assumable identity, usually temporary, used by applications, AWS services, or federated users. For EC2, ECS, and Lambda workloads, I prefer roles over static access keys.
 
+[↑ Topic Contents](#section-06-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-06-14"></a>
+
 ### 06.14 VPC
 
 A VPC is an isolated AWS virtual network. Within it, I configure CIDR ranges, subnets, route tables, gateways, and security groups. I normally separate public and private resources based on exposure requirements.
+
+[↑ Topic Contents](#section-06-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-06-15"></a>
 
 ### 06.15 RDS
 
 RDS is a managed relational database service. AWS handles provisioning, backups, and some operations depending on configuration. I am still responsible for schemas, indexes, queries, capacity, and access architecture.
 
+[↑ Topic Contents](#section-06-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-06-16"></a>
+
 ### 06.16 SQS
 
 SQS is a managed queue for asynchronous decoupling. Producers send messages and consumers process them independently. It helps absorb spikes, support retries, and reduce temporal coupling among services.
+
+[↑ Topic Contents](#section-06-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-06-17"></a>
 
 ### 06.17 CloudWatch
 
 CloudWatch centralizes metrics, logs, alarms, and dashboards for AWS services. In production, I monitor latency, error rates, saturation, throttling, queues, CPU, memory when available, and business metrics.
 
+[↑ Topic Contents](#section-06-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-06-18"></a>
+
 ### 06.18 Secrets Manager vs Parameter Store
 
 Secrets Manager focuses on secrets and provides features such as integrated rotation in many scenarios. Parameter Store handles configuration and can also store secure values. I choose based on rotation, integration, and cost.
+
+[↑ Topic Contents](#section-06-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-06-19"></a>
 
 ### 06.19 ECS vs EKS
 
 ECS is simpler and tightly integrated with AWS. EKS offers the Kubernetes ecosystem and portability but increases operational complexity. I would choose EKS for a genuine Kubernetes requirement; otherwise, ECS may suffice.
 
+[↑ Topic Contents](#section-06-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-06-20"></a>
+
 ### 06.20 Jenkins
 
 Jenkins is a flexible, extensible automation server. Jenkinsfiles support complex pipelines, but the platform requires operations, plugin updates, security controls, and agent maintenance.
+
+[↑ Topic Contents](#section-06-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-06-21"></a>
 
 ### 06.21 GitLab CI
 
 GitLab CI defines pipelines in a versioned file and integrates build, testing, and deployment with the platform. Core concepts match other tools: stages, jobs, runners, artifacts, and environments.
 
+[↑ Topic Contents](#section-06-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-06-22"></a>
+
 ### 06.22 Post-deployment Observability
 
 Deployment does not end when a container starts. I monitor errors, latency, p95/p99, CPU, memory, GC, connection pools, and business metrics to confirm the new version is healthy.
+
+[↑ Topic Contents](#section-06-toc) · [↑ Master Contents](#sumario-geral)
 
 ---
 
 <a id="section-07"></a>
 ## §07 — Design quality, architecture decisions and maintainability [P1]
 
+<a id="section-07-toc"></a>
+
+## Topic Contents
+
+[↑ Master Contents](#sumario-geral)
+
+- [07.01 SOLID in Practice](#topic-07-01)
+- [07.02 DIP vs Dependency Injection vs IoC](#topic-07-02)
+- [07.03 DRY, KISS, and YAGNI](#topic-07-03)
+- [07.04 Strategy — Behavioral](#topic-07-04)
+- [07.05 Adapter — Structural](#topic-07-05)
+- [07.06 Proxy — Structural](#topic-07-06)
+- [07.07 Repository, DTO, and Mapper](#topic-07-07)
+- [07.08 When Not to Apply a Pattern](#topic-07-08)
+- [07.09 Functional and Nonfunctional Requirements](#topic-07-09)
+- [07.10 ADRs and the C4 Model](#topic-07-10)
+- [07.11 Observability](#topic-07-11)
+- [07.12 Logs, Metrics, and Traces](#topic-07-12)
+- [07.13 Cache-Aside](#topic-07-13)
+- [07.14 Rate Limiting](#topic-07-14)
+- [07.15 Backpressure](#topic-07-15)
+
+---
+
+
 **Focus:** justify a design through maintainability, testability, performance and actual requirements. Avoid pattern-for-pattern’s-sake.
+
+<a id="topic-07-01"></a>
 
 ### 07.01 SOLID in Practice
 
 In a checkout, I separate calculation, persistence, and payment by responsibility, use strategies for variations, and define coherent contracts for integrations. I evaluate the design by how easily rules can be tested and changed, not by the number of classes created.
 
+[↑ Topic Contents](#section-07-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-07-02"></a>
+
 ### 07.02 DIP vs Dependency Injection vs IoC
 
 DIP governs the direction of dependencies in code. Dependency Injection supplies dependencies from outside an object. IoC is the broader inversion of control; injecting a concrete class does not, by itself, satisfy DIP.
+
+[↑ Topic Contents](#section-07-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-07-03"></a>
 
 ### 07.03 DRY, KISS, and YAGNI
 
 DRY avoids duplicating business knowledge; KISS favors understandable solutions; YAGNI avoids building speculative features. Similar-looking code does not always encode the same rule; premature abstraction can also increase coupling.
 
+[↑ Topic Contents](#section-07-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-07-04"></a>
+
 ### 07.04 Strategy — Behavioral
 
 Encapsulates interchangeable algorithms under a common contract, such as shipping or discount calculations. It favors composition and OCP; the client or a policy selects the strategy.
+
+[↑ Topic Contents](#section-07-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-07-05"></a>
 
 ### 07.05 Adapter — Structural
 
 Translates an existing interface into the contract expected by a client. For example, I use it to integrate an external provider with an application port, keeping translation details out of business rules.
 
+[↑ Topic Contents](#section-07-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-07-06"></a>
+
 ### 07.06 Proxy — Structural
 
 Represents another object and controls access to it, potentially applying security, lazy loading, or interception. Spring AOP uses proxies for various features; calls that bypass the proxy may also bypass that behavior.
+
+[↑ Topic Contents](#section-07-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-07-07"></a>
 
 ### 07.07 Repository, DTO, and Mapper
 
 Repository provides domain-oriented persistence access; DTO transfers data across boundaries; Mapper converts representations. These are common patterns in Java applications but are not in the GoF catalog and should not duplicate layers without benefit.
 
+[↑ Topic Contents](#section-07-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-07-08"></a>
+
 ### 07.08 When Not to Apply a Pattern
 
 I avoid a pattern when it creates more indirection than value or anticipates variations without evidence. The solution must remain easy to explain, test, and modify; knowing a pattern's name is not a substitute for assessing its cost.
+
+[↑ Topic Contents](#section-07-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-07-09"></a>
 
 ### 07.09 Functional and Nonfunctional Requirements
 
 Functional requirements describe behavior; nonfunctional requirements define qualities such as latency, availability, security, and cost. I translate vague terms such as "fast" into measurable targets and load conditions to compare options.
 
+[↑ Topic Contents](#section-07-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-07-10"></a>
+
 ### 07.10 ADRs and the C4 Model
 
 An ADR records a decision, its context, alternatives, and consequences. C4 structures views of context, containers, and components, adding code-level detail when useful; I document enough to guide decisions and evolution without diagramming everything.
+
+[↑ Topic Contents](#section-07-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-07-11"></a>
 
 ### 07.11 Observability
 
 Observability helps explain internal system behavior through external signals. I consider logs, metrics, and traces its three main pillars. In distributed systems, correlation IDs, trace IDs, p95/p99, error rates, and saturation are essential for identifying bottlenecks and cross-service failures.
 
+[↑ Topic Contents](#section-07-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-07-12"></a>
+
 ### 07.12 Logs, Metrics, and Traces
 
 Logs explain specific events; metrics show aggregate behavior over time; traces show a request's path through components. I use all three together. A trace can identify a slow service, a metric show frequency, and a log explain the error in that execution.
+
+[↑ Topic Contents](#section-07-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-07-13"></a>
 
 ### 07.13 Cache-Aside
 
 With cache-aside, the application checks the cache; on a miss, it reads the source and populates the cache. This is simple and common but may cause stampedes when many requests miss the same key. TTL, per-key locking, or proactive refresh can help.
 
+[↑ Topic Contents](#section-07-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-07-14"></a>
+
 ### 07.14 Rate Limiting
 
 Rate limiting controls how many operations are accepted over a period. It protects capacity, reduces abuse, and prevents dependency overload. Limits may apply per user, API key, IP, or tenant. I also define an appropriate response, usually `429`, and client retry policies.
 
+[↑ Topic Contents](#section-07-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-07-15"></a>
+
 ### 07.15 Backpressure
 
 Backpressure prevents producers from creating work faster than consumers or dependencies can process it. Bounded queues, concurrency controls, rate limiting, or reactive mechanisms can enforce it. Without backpressure, memory, threads, or connections accumulate until failure.
+
+[↑ Topic Contents](#section-07-toc) · [↑ Master Contents](#sumario-geral)
 
 ---
 
 <a id="section-08"></a>
 ## §08 — Role-specific complements (additional material; not copied from original notes) [P0/P1]
 
+<a id="section-08-toc"></a>
+
+## Topic Contents
+
+[↑ Master Contents](#sumario-geral)
+
+- [08A. Java 8 vs Java 21 — feature timeline [P0]](#topic-08a)
+- [08B. Spring Boot 2.x → 3.x migration — conceptual checklist [P0]](#topic-08b)
+- [08C. Oracle SQL, ERDs and query plans [P0]](#topic-08c)
+- [08D. Advanced Git operations [P0]](#topic-08d)
+- [08E. RabbitMQ vs Kafka — make your Dell/BANCO PAN background count [P0]](#topic-08e)
+- [08F. Estimates, mentoring, English collaboration and cross-stack troubleshooting [P0/P1]](#topic-08f)
+- [08G. JUnit Jupiter and performance evidence [P0]](#topic-08g)
+- [08H. Security tokens and secure microservices [P1]](#topic-08h)
+
+---
+
+
 The job description explicitly requests the following areas. They receive supplemental explanations here because the original notes either did not cover them directly or treated them only indirectly.
+
+<a id="topic-08a"></a>
 
 ### 08A. Java 8 vs Java 21 — feature timeline [P0]
 
@@ -815,6 +1842,10 @@ The job description explicitly requests the following areas. They receive supple
 
 **Virtual threads:** they are most valuable when requests spend time blocked on I/O. They do not multiply database connections or improve CPU-intensive algorithms. In Java 21, blocking while holding a `synchronized` monitor may pin a virtual thread to its carrier. Limits on DB pools, remote APIs and queues still matter.
 
+[↑ Topic Contents](#section-08-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-08b"></a>
+
 ### 08B. Spring Boot 2.x → 3.x migration — conceptual checklist [P0]
 
 1. **Runtime baseline:** Spring Boot 3.0 requires Java **17+** and Spring Framework **6**; a Java 8 application cannot simply update its Boot dependency and start unchanged.
@@ -826,6 +1857,10 @@ The job description explicitly requests the following areas. They receive supple
 
 **Do not conflate two operations:** upgrading the **JDK** from 8 to 21 and upgrading **Spring Boot** from an older generation to 3.x are related but different migrations. The specific framework migration steps only apply if that version change happened in the system.
 
+[↑ Topic Contents](#section-08-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-08c"></a>
+
 ### 08C. Oracle SQL, ERDs and query plans [P0]
 
 - **ERD (Entity–Relationship Diagram):** describes entities/tables, primary keys, foreign keys and cardinalities (one-to-one, one-to-many, many-to-many). Review missing constraints, unnecessary joins, duplicated data, nullable foreign keys, cycles and relationship ownership. Many-to-many relationships normally need a junction table.
@@ -833,6 +1868,10 @@ The job description explicitly requests the following areas. They receive supple
 - **Execution plans:** Oracle can show predicted plans with `EXPLAIN PLAN` and `DBMS_XPLAN.DISPLAY`. For an already executed SQL statement, `DBMS_XPLAN.DISPLAY_CURSOR` can reveal execution information where access and statistics permit. Examine access paths, join methods, estimated versus actual rows, and expensive operations; an index is not automatically the best plan.
 - **Oracle read consistency:** Oracle `READ COMMITTED` uses statement-level consistent reads; transaction behavior is database-specific. Understand locks, `SELECT ... FOR UPDATE`, deadlocks and lost-update protection through application logic, locking or conditional updates.
 - **SQL tuning workflow:** identify high-latency/high-frequency queries → capture SQL and execution statistics → check predicate selectivity and row estimates → check indexes, joins and cardinalities → change one relevant factor → measure under representative data and concurrency.
+
+[↑ Topic Contents](#section-08-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-08d"></a>
 
 ### 08D. Advanced Git operations [P0]
 
@@ -843,12 +1882,20 @@ The job description explicitly requests the following areas. They receive supple
 - **Conflict resolution:** inspect affected files and intended behavior → resolve conflicts → run tests → stage resolved files → use `git rebase --continue` (or finish the merge). `git rebase --abort` returns to the pre-rebase state when appropriate.
 - **`revert` vs `reset`:** `revert` records a new commit that undoes a previous change; `reset` moves a branch reference and may change index/worktree. Revert is generally safer for commits already shared with a team.
 
+[↑ Topic Contents](#section-08-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-08e"></a>
+
 ### 08E. RabbitMQ vs Kafka — make your Dell/BANCO PAN background count [P0]
 
 - **RabbitMQ:** message broker centered on exchanges, queues, bindings and routing keys. Consumers acknowledge messages; manual acknowledgments and dead-letter handling require careful configuration. Prefetch controls in-flight deliveries to a consumer and can help prevent overload.
 - **Kafka:** partitioned, durable event log with consumer offsets and consumer groups. Events can be retained and replayed; ordering is generally per partition rather than global. Partition count affects scaling in a consumer group.
 - **Decision criteria:** RabbitMQ often suits flexible routing and task processing; Kafka often suits high-volume event streams, retention/replay and event fan-out. Both can support asynchronous integration, retries, monitoring and at-least-once delivery patterns, but their abstractions and operational behavior differ.
 - **Idempotent processing:** whenever messages may be redelivered, ensure business effects are not duplicated (e.g., using a stable business-event ID with a uniqueness check/transactional inbox). `ACK` only after safely completing the intended operation according to the design.
+
+[↑ Topic Contents](#section-08-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-08f"></a>
 
 ### 08F. Estimates, mentoring, English collaboration and cross-stack troubleshooting [P0/P1]
 
@@ -859,12 +1906,20 @@ The job description explicitly requests the following areas. They receive supple
 - **C# / React comprehension:** when reading unfamiliar code, trace input → controller/handler → service/domain logic → persistence/network calls → returned state. In React, identify component state, props, effects and API calls; in C#, identify async tasks, dependency injection, controllers and DTOs. Do not claim implementation expertise if your actual strength is integration and flow analysis.
 - **Working with Pacific Time:** clarify expected overlap, meeting times, asynchronous handoffs and communication norms; do not assume the interviewer’s local clock is your local clock.
 
+[↑ Topic Contents](#section-08-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-08g"></a>
+
 ### 08G. JUnit Jupiter and performance evidence [P0]
 
 - **JUnit 5 ecosystem:** JUnit **Platform** launches test engines; **Jupiter** supplies the modern programming model (`@Test`, `@ParameterizedTest`, `@BeforeEach`, `@Nested`, assertions and extensions); **Vintage** allows running older JUnit 3/4 tests. Writing a Jupiter test is not a separate alternative to using JUnit—it is part of the JUnit 5 ecosystem.
 - **Mocking strategy:** use Mockito for collaborators whose behavior is not under test. Prefer real domain objects for business rules and actual containerized dependencies for database/broker integration. Avoid asserting only implementation details.
 - **Load test:** measure behavior under expected concurrent requests, realistic data and known SLAs/SLOs. Track throughput (requests/s), p50/p95/p99 latency, error rate and resource saturation.
 - **Stress test:** increase traffic beyond normal capacity to find bottlenecks and failure modes. A useful report identifies breaking points, queue behavior, recovery characteristics and the changes made after measurement.
+
+[↑ Topic Contents](#section-08-toc) · [↑ Master Contents](#sumario-geral)
+
+<a id="topic-08h"></a>
 
 ### 08H. Security tokens and secure microservices [P1]
 
@@ -873,10 +1928,22 @@ The job description explicitly requests the following areas. They receive supple
 - **Service-to-service authorization:** authenticate the calling service and independently authorize its intended operation. An API gateway can centralize some controls but does not eliminate checks in downstream services.
 - **Secrets:** use managed secret storage and scoped identity-based access, not hardcoded repository configuration. Rotation and auditability matter.
 
+[↑ Topic Contents](#section-08-toc) · [↑ Master Contents](#sumario-geral)
+
 ---
 
 <a id="section-09"></a>
 ## §09 — Final concept checklist
+
+<a id="section-09-toc"></a>
+
+## Topic Contents
+
+[↑ Master Contents](#sumario-geral)
+
+
+---
+
 
 The goal is to be able to explain each item in **45–90 seconds**, give one technical example and state a realistic limitation, without memorizing a script.
 
